@@ -1,0 +1,227 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String
+  name         String
+  role         String        // STUDENT, ADVISOR, MED_OFFICER, WARDEN, FACULTY, HOD, ADMIN
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  
+  // Relations
+  student      Student?
+  warden       Warden?
+  faculty      Faculty?
+  comments     Comment[]
+  notifications Notification[]
+  auditLogs    AuditLog[]
+}
+
+model Student {
+  id            String        @id @default(uuid())
+  userId        String        @unique
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rollNumber    String        @unique
+  isResidential Boolean       @default(true)
+  hostelName    String?       // E.g. H-1, H-2
+  roomNumber    String?
+  parentContact String?
+  
+  departmentId  String
+  department    Department    @relation(fields: [departmentId], references: [id])
+  
+  enrollments   Enrollment[]
+  leaves        LeaveApplication[]
+}
+
+model Warden {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hostelName String   // The hostel this warden supervises
+}
+
+model Faculty {
+  id           String       @id @default(uuid())
+  userId       String       @unique
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  departmentId String
+  department   Department   @relation(fields: [departmentId], references: [id])
+  designation  String       // E.g. Assistant Professor, HOD, Advisor
+  
+  // Faculty members who act as HODs or Advisors for specific departments
+  isHOD        Boolean      @default(false)
+  isAdvisor    Boolean      @default(false)
+  
+  condonedClasses MissedClass[]
+}
+
+model Department {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  code      String    @unique // E.g. CSE, ECE, CE
+  
+  students  Student[]
+  faculty   Faculty[]
+  courses   Course[]
+}
+
+model Course {
+  id           String        @id @default(uuid())
+  code         String        @unique // E.g. CSE-301
+  name         String
+  credits      Int
+  departmentId String
+  department   Department    @relation(fields: [departmentId], references: [id])
+  
+  enrollments  Enrollment[]
+  timetable    TimetableSlot[]
+  missedClasses MissedClass[]
+}
+
+model Enrollment {
+  id        String   @id @default(uuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  section   String   // E.g. A1, A2, B1
+  createdAt DateTime @default(now())
+
+  @@unique([studentId, courseId])
+}
+
+model TimetableSlot {
+  id        String   @id @default(uuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  section   String   // E.g. A1, A2, B1
+  dayOfWeek Int      // 1 = Monday, 2 = Tuesday, ..., 5 = Friday
+  startTime String   // "09:00"
+  endTime   String   // "10:00"
+  type      String   // LECTURE, TUTORIAL, LAB
+}
+
+model LeaveApplication {
+  id                    String            @id @default(uuid())
+  studentId             String
+  student               Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  startDate             DateTime
+  endDate               DateTime
+  reason                String
+  category              String            // FEVER_INFECTION, INJURY, CHRONIC, MENTAL_HEALTH, OTHER
+  
+  // Proxy details
+  isProxy               Boolean           @default(false)
+  proxyName             String?
+  proxyRelationship     String?
+  
+  // Approval pipeline state
+  status                String            @default("PENDING_HEALTH_CENTRE") // PENDING_HEALTH_CENTRE, PENDING_WARDEN, PENDING_ADVISOR, APPROVED, REJECTED, CLARIFICATION_REQUESTED
+  currentApproverRole   String            @default("MED_OFFICER")
+  healthCentreApproved  Boolean           @default(false)
+  wardenApproved        Boolean           @default(false)
+  advisorApproved       Boolean           @default(false)
+  
+  // Deadlines for SLA / Escalation
+  healthCentreDeadline  DateTime?
+  wardenDeadline        DateTime?
+  advisorDeadline       DateTime?
+  isEscalated           Boolean           @default(false)
+  
+  remarks               String?
+  
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  
+  // Relations
+  documents             MedicalDocument[]
+  comments              Comment[]
+  missedClasses         MissedClass[]
+}
+
+model MedicalDocument {
+  id                 String           @id @default(uuid())
+  leaveApplicationId String
+  leaveApplication   LeaveApplication @relation(fields: [leaveApplicationId], references: [id], onDelete: Cascade)
+  fileUrl            String
+  fileType           String           // PDF, JPG, PNG
+  originalName       String
+  uploadedAt         DateTime         @default(now())
+  
+  aiAnalysis         AIAnalysis?
+}
+
+model AIAnalysis {
+  id                 String          @id @default(uuid())
+  medicalDocumentId  String          @unique
+  medicalDocument    MedicalDocument @relation(fields: [medicalDocumentId], references: [id], onDelete: Cascade)
+  
+  patientName        String?
+  doctorName         String?
+  hospitalName       String?
+  diagnosis          String?
+  restDays           Int?
+  confidenceScore    Float           @default(0.0)
+  autoSummary        String?
+  status             String          @default("UNVERIFIED") // UNVERIFIED, VALID, SUSPICIOUS
+  fraudAlerts        String?         // JSON string array of flags
+  createdAt          DateTime        @default(now())
+}
+
+model MissedClass {
+  id                 String            @id @default(uuid())
+  leaveApplicationId String
+  leaveApplication   LeaveApplication  @relation(fields: [leaveApplicationId], references: [id], onDelete: Cascade)
+  courseId           String
+  course             Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  date               DateTime
+  slotId             String            // ID or descriptor of time slot
+  slotName           String            // E.g. "Lecture (09:00 - 10:00)"
+  isPartial          Boolean           @default(false)
+  
+  status             String            @default("PENDING") // PENDING, CONDONED, REJECTED
+  facultyId          String?           // Faculty member who condoned
+  faculty            Faculty?          @relation(fields: [facultyId], references: [id])
+  condonedAt         DateTime?
+  
+  createdAt          DateTime          @default(now())
+}
+
+model Comment {
+  id                 String           @id @default(uuid())
+  leaveApplicationId String
+  leaveApplication   LeaveApplication @relation(fields: [leaveApplicationId], references: [id], onDelete: Cascade)
+  userId             String
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content            String
+  createdAt          DateTime         @default(now())
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  type      String           // APPROVAL_REQUEST, CLARIFICATION, DECISION, ESCALATION, COMMENT
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String   // E.g. CONDONE_ATTENDANCE, APPROVE_LEAVE, ESCALATE_LEAVE
+  details   String   // JSON string of detail values
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
