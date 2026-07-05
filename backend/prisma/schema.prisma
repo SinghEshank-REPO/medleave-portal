@@ -1,6 +1,6 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 generator client {
@@ -57,9 +57,8 @@ model Faculty {
   department   Department   @relation(fields: [departmentId], references: [id])
   designation  String       // E.g. Assistant Professor, HOD, Advisor
   
-  // Faculty members who act as HODs or Advisors for specific departments
+  // Faculty members who act as HODs for specific departments
   isHOD        Boolean      @default(false)
-  isAdvisor    Boolean      @default(false)
   
   condonedClasses MissedClass[]
 }
@@ -125,16 +124,16 @@ model LeaveApplication {
   proxyRelationship     String?
   
   // Approval pipeline state
-  status                String            @default("PENDING_HEALTH_CENTRE") // PENDING_HEALTH_CENTRE, PENDING_WARDEN, PENDING_ADVISOR, APPROVED, REJECTED, CLARIFICATION_REQUESTED
+  status                String            @default("PENDING_HEALTH_CENTRE") // PENDING_HEALTH_CENTRE, PENDING_WARDEN, PENDING_FACULTY, APPROVED, REJECTED, CLARIFICATION_REQUESTED
   currentApproverRole   String            @default("MED_OFFICER")
   healthCentreApproved  Boolean           @default(false)
   wardenApproved        Boolean           @default(false)
-  advisorApproved       Boolean           @default(false)
+  facultyApproved       Boolean           @default(false)
   
   // Deadlines for SLA / Escalation
   healthCentreDeadline  DateTime?
   wardenDeadline        DateTime?
-  advisorDeadline       DateTime?
+  facultyDeadline       DateTime?
   isEscalated           Boolean           @default(false)
   
   remarks               String?

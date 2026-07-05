@@ -161,6 +161,21 @@ export class LeaveController {
         });
       }
 
+      // Notify HOD of student's department (Notifications only, no approval role)
+      const departmentHods = await prisma.faculty.findMany({
+        where: { departmentId: student.departmentId, isHOD: true },
+        include: { user: true }
+      });
+      for (const hod of departmentHods) {
+        await prisma.notification.create({
+          data: {
+            userId: hod.user.id,
+            message: `Notification: Student ${student.user.name} (${student.rollNumber}) has submitted a medical leave request (${parsedStartDate.toLocaleDateString()} to ${parsedEndDate.toLocaleDateString()}).`,
+            type: 'DECISION'
+          }
+        });
+      }
+
       // 7. Write Audit Log
       await AuditService.log({
         userId: student.userId,
@@ -231,7 +246,7 @@ export class LeaveController {
           },
           orderBy: { createdAt: 'desc' }
         });
-      } else if (role === 'ADVISOR' || role === 'HOD') {
+      } else if (role === 'FACULTY' || role === 'HOD') {
         // List leaves matching department
         const faculty = await prisma.faculty.findUnique({ where: { userId: req.user.id } });
         if (!faculty) return res.status(404).json({ message: 'Faculty profile not found.' });
@@ -338,18 +353,18 @@ export class LeaveController {
       // Verification checks depending on current level
       if (leave.status === 'PENDING_HEALTH_CENTRE' && currentRole === 'MED_OFFICER') {
         if (action === 'APPROVE') {
-          // Progress to Warden if residential, else Faculty Advisor
-          nextApproverRole = leave.student.isResidential ? 'WARDEN' : 'ADVISOR';
-          updatedStatus = leave.student.isResidential ? 'PENDING_WARDEN' : 'PENDING_ADVISOR';
+          // Progress to Warden if residential, else Faculty
+          nextApproverRole = leave.student.isResidential ? 'WARDEN' : 'FACULTY';
+          updatedStatus = leave.student.isResidential ? 'PENDING_WARDEN' : 'PENDING_FACULTY';
           
           await prisma.leaveApplication.update({
             where: { id },
             data: {
               healthCentreApproved: true,
               healthCentreDeadline: null, // cleared
-              // Set next deadline (24 hours for warden or 48 for advisor)
+              // Set next deadline (24 hours for warden or 48 for faculty)
               wardenDeadline: leave.student.isResidential ? new Date(now.getTime() + 24 * 60 * 60 * 1000) : null,
-              advisorDeadline: !leave.student.isResidential ? new Date(now.getTime() + 48 * 60 * 60 * 1000) : null
+              facultyDeadline: !leave.student.isResidential ? new Date(now.getTime() + 48 * 60 * 60 * 1000) : null
             }
           });
         } else if (action === 'REJECT') {
@@ -359,15 +374,15 @@ export class LeaveController {
         }
       } else if (leave.status === 'PENDING_WARDEN' && currentRole === 'WARDEN') {
         if (action === 'APPROVE') {
-          nextApproverRole = 'ADVISOR';
-          updatedStatus = 'PENDING_ADVISOR';
+          nextApproverRole = 'FACULTY';
+          updatedStatus = 'PENDING_FACULTY';
           
           await prisma.leaveApplication.update({
             where: { id },
             data: {
               wardenApproved: true,
               wardenDeadline: null,
-              advisorDeadline: new Date(now.getTime() + 48 * 60 * 60 * 1000)
+              facultyDeadline: new Date(now.getTime() + 48 * 60 * 60 * 1000)
             }
           });
         } else if (action === 'REJECT') {
@@ -375,17 +390,31 @@ export class LeaveController {
         } else {
           updatedStatus = 'CLARIFICATION_REQUESTED';
         }
-      } else if (leave.status === 'PENDING_ADVISOR' && (currentRole === 'ADVISOR' || currentRole === 'HOD')) {
+      } else if (leave.status === 'PENDING_FACULTY' && currentRole === 'FACULTY') {
         if (action === 'APPROVE') {
           // Fully approved!
-          nextApproverRole = 'FACULTY'; // Condonations now active for individual faculty members
+          nextApproverRole = 'FACULTY';
           updatedStatus = 'APPROVED';
           
           await prisma.leaveApplication.update({
             where: { id },
             data: {
-              advisorApproved: true,
-              advisorDeadline: null
+              facultyApproved: true,
+              facultyDeadline: null
+            }
+          });
+
+          // Auto-condone all missed classes for this leave application with one click!
+          const facultyProfile = await prisma.faculty.findUnique({
+            where: { userId: req.user.id }
+          });
+          
+          await prisma.missedClass.updateMany({
+            where: { leaveApplicationId: id, status: 'PENDING' },
+            data: {
+              status: 'CONDONED',
+              facultyId: facultyProfile?.id || null,
+              condonedAt: new Date()
             }
           });
         } else if (action === 'REJECT') {
@@ -429,10 +458,29 @@ export class LeaveController {
         }
       });
 
-      // If fully approved, trigger per-faculty notifications for missed classes
+      // If fully approved, trigger HOD notifications and condoned log entries
       if (updatedStatus === 'APPROVED') {
+        // Notify HOD of the student's department about final approval
+        const studentProfileForNotification = await prisma.student.findUnique({
+          where: { id: leave.studentId }
+        });
+        if (studentProfileForNotification) {
+          const departmentHods = await prisma.faculty.findMany({
+            where: { departmentId: studentProfileForNotification.departmentId, isHOD: true },
+            include: { user: true }
+          });
+          for (const hod of departmentHods) {
+            await prisma.notification.create({
+              data: {
+                userId: hod.user.id,
+                message: `Notification: Medical leave for student ${leave.student.user.name} (${leave.student.rollNumber}) has been FULLY APPROVED.`,
+                type: 'DECISION'
+              }
+            });
+          }
+        }
         await this.triggerCondonationNotifications(id);
-      } else if (updatedStatus === 'PENDING_WARDEN' || updatedStatus === 'PENDING_ADVISOR') {
+      } else if (updatedStatus === 'PENDING_WARDEN' || updatedStatus === 'PENDING_FACULTY') {
         // Notify the next reviewer role
         const approverUsers = await prisma.user.findMany({ where: { role: nextApproverRole } });
         for (const appUser of approverUsers) {
@@ -543,7 +591,7 @@ export class LeaveController {
         status: statusStr,
         healthCentreStatus: leave.healthCentreApproved ? 'VERIFIED' : 'PENDING/BYPASSED',
         wardenStatus: leave.student.isResidential ? (leave.wardenApproved ? 'APPROVED' : 'PENDING') : 'N/A',
-        advisorStatus: leave.advisorApproved ? 'APPROVED' : 'PENDING',
+        facultyStatus: leave.facultyApproved ? 'APPROVED' : 'PENDING',
         approvalRemarks: leave.remarks || 'No remarks',
         missedClasses: leave.missedClasses.map((mc) => ({
           courseCode: mc.course.code,

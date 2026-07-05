@@ -93,7 +93,7 @@ export default function StudentLeaveDetailsPage({ params }: PageProps) {
       CLARIFICATION_REQUESTED: 'text-amber-400 border-amber-500/20 bg-amber-500/5',
       PENDING_HEALTH_CENTRE: 'text-blue-400 border-blue-500/20 bg-blue-500/5',
       PENDING_WARDEN: 'text-cyan-400 border-cyan-500/20 bg-cyan-500/5',
-      PENDING_ADVISOR: 'text-purple-400 border-purple-500/20 bg-purple-500/5'
+      PENDING_FACULTY: 'text-purple-400 border-purple-500/20 bg-purple-500/5'
     };
     return colors[status] || 'text-slate-400 border-slate-500/20 bg-slate-500/5';
   };
@@ -127,7 +127,7 @@ export default function StudentLeaveDetailsPage({ params }: PageProps) {
             <ul className="list-disc pl-5 mt-1 space-y-1">
               <li>Health Centre Status: {report.healthCentreStatus}</li>
               <li>Hostel Warden Status: {report.wardenStatus}</li>
-              <li>Faculty Advisor Status: {report.advisorStatus}</li>
+              <li>Faculty Status: {report.facultyStatus}</li>
             </ul>
           </div>
           <div>
@@ -351,14 +351,14 @@ export default function StudentLeaveDetailsPage({ params }: PageProps) {
                   </div>
                 )}
 
-                {/* 3. Faculty Advisor */}
+                {/* 3. Faculty */}
                 <div className="relative">
-                  <div className={`absolute -left-6 w-5.5 h-5.5 rounded-full flex items-center justify-center ring-4 ring-[#0a0f1d] ${leave.advisorApproved ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-500'}`}>
+                  <div className={`absolute -left-6 w-5.5 h-5.5 rounded-full flex items-center justify-center ring-4 ring-[#0a0f1d] ${leave.facultyApproved ? 'bg-emerald-500 text-white' : 'bg-slate-800 text-slate-500'}`}>
                     <CheckCircle2 className="w-3.5 h-3.5" />
                   </div>
                   <div className="space-y-0.5 text-left">
-                    <h5 className="font-bold text-white">Faculty Advisor</h5>
-                    <p className="text-[10px] text-slate-500">Status: {leave.advisorApproved ? 'Fully Approved' : 'Pending Review'}</p>
+                    <h5 className="font-bold text-white">Faculty</h5>
+                    <p className="text-[10px] text-slate-500">Status: {leave.facultyApproved ? 'Fully Approved' : 'Pending Review'}</p>
                   </div>
                 </div>
               </div>

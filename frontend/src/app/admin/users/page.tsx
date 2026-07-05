@@ -30,7 +30,6 @@ export default function AdminUsersPage() {
       ADMIN: 'bg-red-500/10 text-red-400 border-red-500/20',
       MED_OFFICER: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
       WARDEN: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-      ADVISOR: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
       HOD: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
       FACULTY: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
       STUDENT: 'bg-slate-500/10 text-slate-400 border-slate-500/20',

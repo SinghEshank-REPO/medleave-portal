@@ -32,7 +32,7 @@ export default function LoginPage() {
       } else if (role === 'ADMIN') {
         router.push('/admin/dashboard');
       } else {
-        // ADVISOR, HOD, WARDEN, MED_OFFICER all use the unified Approver Dashboard
+        // FACULTY, HOD, WARDEN, MED_OFFICER all use the unified Approver Dashboard
         router.push('/approver/dashboard');
       }
     } catch (err: any) {
@@ -51,7 +51,7 @@ export default function LoginPage() {
         {/* Branding header */}
         <div className="flex flex-col items-center mb-8 text-center">
           <Link href="/" className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-medical-500 to-cyan-400 flex items-center justify-center glow-medical">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-medical-500 to-indigo-500 flex items-center justify-center glow-medical">
               <Activity className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-xl text-white">MedLeave Portal</span>
@@ -106,7 +106,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-medical-600 to-cyan-500 hover:from-medical-500 hover:to-cyan-400 text-white font-medium text-sm flex items-center justify-center gap-2 transition active:scale-[0.99] disabled:opacity-55 disabled:pointer-events-none glow-medical mt-6"
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-medical-600 to-indigo-600 hover:from-medical-500 hover:to-indigo-500 text-white font-medium text-sm flex items-center justify-center gap-2 transition active:scale-[0.99] disabled:opacity-55 disabled:pointer-events-none glow-medical mt-6"
             >
               {loading ? (
                 <>
@@ -136,7 +136,6 @@ export default function LoginPage() {
             <div>Student: <span className="text-slate-300 font-mono">student@juit.ac.in</span></div>
             <div>Medical Off: <span className="text-slate-300 font-mono">doctor@juit.ac.in</span></div>
             <div>Warden: <span className="text-slate-300 font-mono">warden@juit.ac.in</span></div>
-            <div>Advisor: <span className="text-slate-300 font-mono">advisor@juit.ac.in</span></div>
             <div>Faculty (OS): <span className="text-slate-300 font-mono">prof.os@juit.ac.in</span></div>
             <div>HOD (CSE): <span className="text-slate-300 font-mono">hod.cse@juit.ac.in</span></div>
           </div>

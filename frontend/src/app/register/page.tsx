@@ -22,7 +22,7 @@ export default function RegisterPage() {
   const [roomNumber, setRoomNumber] = useState('');
   const [parentContact, setParentContact] = useState('');
   
-  // Faculty/Advisor Specific
+  // Faculty Specific
   const [designation, setDesignation] = useState('');
   
   // Warden Specific
@@ -81,7 +81,7 @@ export default function RegisterPage() {
       payload.wardenHostelName = wardenHostelName;
       // Wardens don't have departments, delete departmentId
       delete payload.departmentId;
-    } else if (['FACULTY', 'ADVISOR', 'HOD'].includes(role)) {
+    } else if (['FACULTY', 'HOD'].includes(role)) {
       payload.designation = designation;
     }
 
@@ -111,7 +111,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-lg relative z-10">
         <div className="flex flex-col items-center mb-6 text-center">
           <Link href="/" className="flex items-center gap-3 mb-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-medical-500 to-cyan-400 flex items-center justify-center glow-medical">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-medical-500 to-indigo-500 flex items-center justify-center glow-medical">
               <Activity className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-lg text-white font-sans">MedLeave Portal</span>
@@ -188,7 +188,6 @@ export default function RegisterPage() {
               >
                 <option value="STUDENT">Student</option>
                 <option value="FACULTY">Teaching Faculty</option>
-                <option value="ADVISOR">Faculty Advisor</option>
                 <option value="WARDEN">Hostel Warden</option>
                 <option value="MED_OFFICER">Medical Officer (Health Centre)</option>
                 <option value="HOD">Head of Department (HOD)</option>
@@ -279,8 +278,8 @@ export default function RegisterPage() {
               </div>
             )}
 
-            {/* Dynamic Section: Faculty/Advisor Details */}
-            {['FACULTY', 'ADVISOR', 'HOD'].includes(role) && (
+            {/* Dynamic Section: Faculty Details */}
+            {['FACULTY', 'HOD'].includes(role) && (
               <div className="p-4 rounded-xl border border-white/5 bg-slate-950/20 space-y-3">
                 <p className="font-semibold text-slate-400 text-xs">Faculty Assignment Details</p>
                 <div className="grid grid-cols-2 gap-3">
@@ -333,7 +332,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-medical-600 to-cyan-500 hover:from-medical-500 hover:to-cyan-400 text-white font-medium flex items-center justify-center gap-2 transition active:scale-[0.99] disabled:opacity-55 disabled:pointer-events-none glow-medical mt-4"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-medical-600 to-indigo-600 hover:from-medical-500 hover:to-indigo-500 text-white font-medium flex items-center justify-center gap-2 transition active:scale-[0.99] disabled:opacity-55 disabled:pointer-events-none glow-medical mt-4"
             >
               {loading ? (
                 <>

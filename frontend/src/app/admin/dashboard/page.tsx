@@ -151,7 +151,7 @@ export default function AdminDashboard() {
                       <span>{dept.leaveCount} Leaves</span>
                     </div>
                     <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-medical-600 to-cyan-500" style={{ width: `${percent}%` }} />
+                      <div className="h-full bg-gradient-to-r from-medical-600 to-indigo-600" style={{ width: `${percent}%` }} />
                     </div>
                   </div>
                 );
@@ -171,7 +171,7 @@ export default function AdminDashboard() {
                 const heightPercent = (t.count / max) * 75 + 10; // offset for display
                 return (
                   <div key={t.month} className="flex flex-col items-center flex-1 space-y-2 group">
-                    <div className="relative w-6 bg-gradient-to-t from-medical-700/60 to-cyan-500 rounded-t-lg transition hover:glow-medical flex items-end justify-center" style={{ height: `${heightPercent}%` }}>
+                    <div className="relative w-6 bg-gradient-to-t from-medical-700/60 to-indigo-600 rounded-t-lg transition hover:glow-medical flex items-end justify-center" style={{ height: `${heightPercent}%` }}>
                       <span className="absolute top-[-25px] scale-0 group-hover:scale-100 transition px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-bold text-white">{t.count}</span>
                     </div>
                     <span className="text-[10px] text-slate-500 font-bold">{t.month}</span>

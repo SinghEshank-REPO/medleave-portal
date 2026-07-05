@@ -24,7 +24,6 @@ export class AuthController {
         // Faculty specific fields
         designation,
         isHOD,
-        isAdvisor,
         // Warden specific fields
         wardenHostelName
       } = req.body;
@@ -92,15 +91,14 @@ export class AuthController {
               hostelName: wardenHostelName
             }
           });
-        } else if (['FACULTY', 'ADVISOR', 'HOD'].includes(role)) {
+        } else if (['FACULTY', 'HOD'].includes(role)) {
           if (!departmentId) throw new Error('Department is required for faculty members.');
           await tx.faculty.create({
             data: {
               userId: user.id,
               departmentId,
               designation: designation || 'Instructor',
-              isHOD: role === 'HOD' || !!isHOD,
-              isAdvisor: role === 'ADVISOR' || !!isAdvisor
+              isHOD: role === 'HOD' || !!isHOD
             }
           });
         }

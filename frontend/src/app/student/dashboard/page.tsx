@@ -38,13 +38,13 @@ export default function StudentDashboard() {
       CLARIFICATION_REQUESTED: <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold uppercase">Clarification Req</span>,
       PENDING_HEALTH_CENTRE: <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-bold uppercase">At Health Centre</span>,
       PENDING_WARDEN: <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-bold uppercase">At Warden</span>,
-      PENDING_ADVISOR: <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[10px] font-bold uppercase">At Advisor</span>
+      PENDING_FACULTY: <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[10px] font-bold uppercase">At Faculty</span>
     };
     return badges[status] || <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-500/10 border border-slate-500/20 text-slate-400 text-[10px] font-bold uppercase">{status}</span>;
   };
 
   const approvedLeaves = leaves.filter(l => l.status === 'APPROVED');
-  const pendingLeaves = leaves.filter(l => ['PENDING_HEALTH_CENTRE', 'PENDING_WARDEN', 'PENDING_ADVISOR'].includes(l.status));
+  const pendingLeaves = leaves.filter(l => ['PENDING_HEALTH_CENTRE', 'PENDING_WARDEN', 'PENDING_FACULTY'].includes(l.status));
 
   return (
     <NavbarFrame>
@@ -57,7 +57,7 @@ export default function StudentDashboard() {
           </div>
           <Link
             href="/student/apply"
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-medical-600 to-cyan-500 hover:from-medical-500 hover:to-cyan-400 text-white text-xs font-semibold hover:scale-[1.01] transition active:scale-[0.99] glow-medical"
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-medical-600 to-indigo-600 hover:from-medical-500 hover:to-indigo-500 text-white text-xs font-semibold hover:scale-[1.01] transition active:scale-[0.99] glow-medical"
           >
             <Plus className="w-4 h-4" /> Apply For Medical Leave
           </Link>

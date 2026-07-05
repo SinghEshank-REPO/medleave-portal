@@ -50,12 +50,12 @@ export default function ApproverDashboard() {
   } else if (role === 'WARDEN') {
     queueTitle = `Hostel Warden (${user.warden?.hostelName}) Queue`;
     filteredLeaves = leaves.filter((l) => l.status === 'PENDING_WARDEN');
-  } else if (role === 'ADVISOR') {
-    queueTitle = `Faculty Advisor Queue (CSE Department)`;
-    filteredLeaves = leaves.filter((l) => l.status === 'PENDING_ADVISOR');
+  } else if (role === 'FACULTY') {
+    queueTitle = `Faculty Condonation Queue`;
+    filteredLeaves = leaves.filter((l) => l.status === 'PENDING_FACULTY');
   } else if (role === 'HOD') {
-    queueTitle = 'Department HOD Approvals Dashboard';
-    filteredLeaves = leaves.filter((l) => l.status === 'PENDING_ADVISOR'); // HOD can act on Advisor stage as well
+    queueTitle = 'Department HOD Monitoring Dashboard';
+    filteredLeaves = leaves.filter((l) => l.status === 'PENDING_FACULTY');
   } else {
     filteredLeaves = leaves; // admin view
   }

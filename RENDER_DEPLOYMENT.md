@@ -65,7 +65,7 @@ Deploy the Express backend as a **Web Service** on Render.
 4. Set the build and start commands:
    - **Build Command**: 
      ```bash
-     npm install && npx prisma generate && npm run build
+     npm install --production=false && npx prisma generate && npm run build
      ```
    - **Start Command**: 
      ```bash
@@ -117,7 +117,7 @@ Next.js 15 apps containing dynamic routing and client-side page transitions are 
 4. Set the build and start commands:
    - **Build Command**: 
      ```bash
-     npm install && npm run build
+     npm install --production=false --legacy-peer-deps && npm run build
      ```
    - **Start Command**: 
      ```bash

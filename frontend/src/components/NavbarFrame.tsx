@@ -87,7 +87,7 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-white">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-medical-500 to-cyan-400 flex items-center justify-center animate-pulse glow-medical">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-medical-500 to-indigo-500 flex items-center justify-center animate-pulse glow-medical">
             <Activity className="w-6 h-6" />
           </div>
           <span className="text-sm font-semibold text-slate-400">Loading Portal context...</span>
@@ -108,6 +108,7 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
       );
     } else if (role === 'FACULTY') {
       links.push(
+        { name: 'Approvals Queue', href: '/approver/dashboard', icon: ClipboardCheck },
         { name: 'Condonations', href: '/faculty/dashboard', icon: CheckSquare }
       );
     } else if (role === 'ADMIN') {
@@ -117,7 +118,7 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
         { name: 'Audit Logs', href: '/admin/audit', icon: ScrollText }
       );
     } else {
-      // ADVISOR, HOD, WARDEN, MED_OFFICER
+      // HOD, WARDEN, MED_OFFICER
       links.push(
         { name: 'Approvals Queue', href: '/approver/dashboard', icon: ClipboardCheck }
       );
@@ -144,7 +145,7 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
           </button>
           
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-medical-500 to-cyan-400 flex items-center justify-center glow-medical">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-medical-500 to-indigo-500 flex items-center justify-center glow-medical">
               <Activity className="w-4.5 h-4.5 text-white" />
             </div>
             <span className="font-bold text-base bg-gradient-to-r from-white via-slate-300 to-medical-400 bg-clip-text text-transparent hidden sm:inline-block">
@@ -248,7 +249,7 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
                       key={link.name}
                       href={link.href}
                       onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center justify-between px-4 py-3 rounded-xl transition text-xs font-semibold ${isActive ? 'bg-gradient-to-r from-medical-600/20 to-cyan-500/10 border-l-4 border-medical-500 text-medical-400' : 'text-slate-400 hover:bg-slate-800/30 hover:text-white'}`}
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl transition text-xs font-semibold ${isActive ? 'bg-gradient-to-r from-medical-600/20 to-indigo-600/10 border-l-4 border-medical-500 text-medical-400' : 'text-slate-400 hover:bg-slate-800/30 hover:text-white'}`}
                     >
                       <div className="flex items-center gap-3">
                         <LinkIcon className="w-4.5 h-4.5" />

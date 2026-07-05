@@ -19,7 +19,7 @@ export class EscalationService {
           in: [
             'PENDING_HEALTH_CENTRE',
             'PENDING_WARDEN',
-            'PENDING_ADVISOR'
+            'PENDING_FACULTY'
           ]
         }
       },
@@ -39,121 +39,157 @@ export class EscalationService {
 
       if (leave.status === 'PENDING_HEALTH_CENTRE') {
         deadline = leave.healthCentreDeadline;
-        nextRole = 'WARDEN';
-        nextStatus = leave.student.isResidential ? 'PENDING_WARDEN' : 'PENDING_ADVISOR';
+        nextRole = leave.student.isResidential ? 'WARDEN' : 'FACULTY';
+        nextStatus = leave.student.isResidential ? 'PENDING_WARDEN' : 'PENDING_FACULTY';
       } else if (leave.status === 'PENDING_WARDEN') {
         deadline = leave.wardenDeadline;
-        nextRole = 'ADVISOR';
-        nextStatus = 'PENDING_ADVISOR';
-      } else if (leave.status === 'PENDING_ADVISOR') {
-        deadline = leave.advisorDeadline;
-        nextRole = 'HOD';
-        nextStatus = 'APPROVED'; // Escalates directly to approved (or HOD review)
+        nextRole = 'FACULTY';
+        nextStatus = 'PENDING_FACULTY';
+      } else if (leave.status === 'PENDING_FACULTY') {
+        deadline = leave.facultyDeadline;
+        nextRole = 'FACULTY';
+        nextStatus = 'APPROVED';
       }
 
       if (!deadline) continue;
 
       const timeDiffMs = now.getTime() - deadline.getTime();
-      const doubleWindowLapse = timeDiffMs > 0 && leave.isEscalated; // Already escalated once, and double time has passed
-      const singleWindowLapse = timeDiffMs > 0 && !leave.isEscalated; // Lapsed once
 
-      if (doubleWindowLapse) {
-        // AUTO FORWARD: Escalate to next stage since authority missed both windows
-        console.log(`[EscalationService] SLA second window lapsed for application ${leave.id}. Auto-forwarding status.`);
-        
-        let updateData: any = {};
-        if (leave.status === 'PENDING_HEALTH_CENTRE') {
-          updateData = {
-            status: nextStatus,
-            healthCentreApproved: true, // Marked as auto-bypassed
-            currentApproverRole: nextRole,
-            remarks: (leave.remarks || '') + '\n[SLA Auto-Forwarded by Health Centre omission]',
-            isEscalated: false,
-            // Set next deadline (24 hours from now)
-            wardenDeadline: new Date(now.getTime() + 24 * 60 * 60 * 1000),
-            advisorDeadline: new Date(now.getTime() + 48 * 60 * 60 * 1000)
-          };
-        } else if (leave.status === 'PENDING_WARDEN') {
-          updateData = {
-            status: nextStatus,
-            wardenApproved: true,
-            currentApproverRole: nextRole,
-            remarks: (leave.remarks || '') + '\n[SLA Auto-Forwarded by Warden omission]',
-            isEscalated: false,
-            advisorDeadline: new Date(now.getTime() + 48 * 60 * 60 * 1000)
-          };
-        } else if (leave.status === 'PENDING_ADVISOR') {
-          updateData = {
-            status: 'APPROVED',
-            advisorApproved: true,
-            currentApproverRole: 'FACULTY',
-            remarks: (leave.remarks || '') + '\n[SLA Auto-Approved by Advisor omission]',
-            isEscalated: false
-          };
-        }
-
-        const updatedLeave = await prisma.leaveApplication.update({
-          where: { id: leave.id },
-          data: updateData
-        });
-
-        // Log to Audit Trail
-        await AuditService.log({
-          userId: '00000000-0000-0000-0000-000000000000', // System account
-          action: 'SLA_AUTO_FORWARD',
-          details: { leaveApplicationId: leave.id, originalStatus: leave.status, targetStatus: updatedLeave.status }
-        });
-
-        // Notify student of progress
-        await prisma.notification.create({
-          data: {
-            userId: leave.student.userId,
-            message: `Your leave application has been auto-forwarded to the next stage due to approval SLA lapse.`,
-            type: 'ESCALATION'
+      // For Health Centre and Warden, they auto-approve immediately when the 24h deadline passes.
+      // For Faculty, they auto-approve when the 48h deadline passes, but send a reminder at 24h.
+      if (leave.status === 'PENDING_HEALTH_CENTRE' || leave.status === 'PENDING_WARDEN') {
+        if (timeDiffMs > 0) {
+          // Deadline lapsed - Auto-forward/approve!
+          console.log(`[EscalationService] SLA deadline lapsed for application ${leave.id} under status ${leave.status}. Auto-forwarding.`);
+          
+          let updateData: any = {};
+          if (leave.status === 'PENDING_HEALTH_CENTRE') {
+            updateData = {
+              status: nextStatus,
+              healthCentreApproved: true, // Auto-verified
+              currentApproverRole: nextRole,
+              remarks: (leave.remarks || '') + '\n[SLA Auto-Forwarded by Health Centre omission after 24 hrs]',
+              isEscalated: false,
+              wardenDeadline: leave.student.isResidential ? new Date(now.getTime() + 24 * 60 * 60 * 1000) : null,
+              facultyDeadline: !leave.student.isResidential ? new Date(now.getTime() + 48 * 60 * 60 * 1000) : null
+            };
+          } else if (leave.status === 'PENDING_WARDEN') {
+            updateData = {
+              status: nextStatus,
+              wardenApproved: true,
+              currentApproverRole: nextRole,
+              remarks: (leave.remarks || '') + '\n[SLA Auto-Forwarded by Warden omission after 24 hrs]',
+              isEscalated: false,
+              facultyDeadline: new Date(now.getTime() + 48 * 60 * 60 * 1000)
+            };
           }
-        });
 
-        // Trigger missed class condonation checks if it was approved
-        if (updatedLeave.status === 'APPROVED') {
-          // Trigger condonation request notifications for faculty
-          await this.triggerCondonationRequests(leave.id);
-        }
+          const updatedLeave = await prisma.leaveApplication.update({
+            where: { id: leave.id },
+            data: updateData
+          });
 
-        autoForwardedCount++;
-      } else if (singleWindowLapse) {
-        // SINGLE WINDOW: Flag as escalated, send high priority warnings
-        console.log(`[EscalationService] SLA turnaround window lapsed for application ${leave.id}. Marking escalated.`);
-        
-        await prisma.leaveApplication.update({
-          where: { id: leave.id },
-          data: { isEscalated: true }
-        });
+          await AuditService.log({
+            userId: '00000000-0000-0000-0000-000000000000',
+            action: 'SLA_AUTO_FORWARD',
+            details: { leaveApplicationId: leave.id, originalStatus: leave.status, targetStatus: updatedLeave.status }
+          });
 
-        // Create alert for relevant role
-        const approverUsers = await prisma.user.findMany({
-          where: { role: leave.currentApproverRole }
-        });
-
-        for (const user of approverUsers) {
           await prisma.notification.create({
             data: {
-              userId: user.id,
-              message: `URGENT: Leave application for student ${leave.student.user.name} (${leave.student.rollNumber}) has lapsed response window. Immediate action required.`,
+              userId: leave.student.userId,
+              message: `Your leave application has been auto-forwarded to the next stage due to approval SLA lapse.`,
               type: 'ESCALATION'
             }
           });
+
+          autoForwardedCount++;
         }
+      } else if (leave.status === 'PENDING_FACULTY') {
+        const hasPassed48h = timeDiffMs > 0;
+        const hasPassed24h = timeDiffMs > -24 * 60 * 60 * 1000; // 24h of the 48h limit have elapsed
 
-        // Notify Student
-        await prisma.notification.create({
-          data: {
-            userId: leave.student.userId,
-            message: `Your leave application approval window has lapsed and has been escalated.`,
-            type: 'ESCALATION'
+        if (hasPassed48h) {
+          // Auto-approve!
+          console.log(`[EscalationService] SLA 48h deadline lapsed for application ${leave.id} under Faculty review. Auto-approving.`);
+          
+          await prisma.leaveApplication.update({
+            where: { id: leave.id },
+            data: {
+              status: 'APPROVED',
+              facultyApproved: true,
+              currentApproverRole: 'FACULTY',
+              remarks: (leave.remarks || '') + '\n[SLA Auto-Approved by Faculty omission after 48 hrs]',
+              isEscalated: false,
+              facultyDeadline: null
+            }
+          });
+
+          // Auto-condone all missed classes
+          await prisma.missedClass.updateMany({
+            where: { leaveApplicationId: leave.id, status: 'PENDING' },
+            data: {
+              status: 'CONDONED',
+              condonedAt: new Date()
+            }
+          });
+
+          await AuditService.log({
+            userId: '00000000-0000-0000-0000-000000000000',
+            action: 'SLA_AUTO_FORWARD',
+            details: { leaveApplicationId: leave.id, originalStatus: leave.status, targetStatus: 'APPROVED' }
+          });
+
+          await prisma.notification.create({
+            data: {
+              userId: leave.student.userId,
+              message: `Your leave application has been auto-approved as the Faculty review window (48h) lapsed.`,
+              type: 'ESCALATION'
+            }
+          });
+
+          // Trigger missed class condoned notifications
+          await this.triggerCondonationRequests(leave.id);
+          autoForwardedCount++;
+        } else if (hasPassed24h && !leave.isEscalated) {
+          // Send reminder (escalate)
+          console.log(`[EscalationService] SLA 24h passed for application ${leave.id} under Faculty review. Sending reminder.`);
+          
+          await prisma.leaveApplication.update({
+            where: { id: leave.id },
+            data: { isEscalated: true }
+          });
+
+          // Notify all faculty of student's department
+          const studentProfile = await prisma.student.findUnique({
+            where: { id: leave.studentId }
+          });
+          if (studentProfile) {
+            const departmentFaculties = await prisma.faculty.findMany({
+              where: { departmentId: studentProfile.departmentId }
+            });
+            for (const fac of departmentFaculties) {
+              await prisma.notification.create({
+                data: {
+                  userId: fac.userId,
+                  message: `URGENT REMINDER: Leave application for student ${leave.student.user.name} (${leave.student.rollNumber}) requires Faculty review. Window is lapsing in 24 hours.`,
+                  type: 'ESCALATION'
+                }
+              });
+            }
           }
-        });
 
-        escalatedCount++;
+          // Notify student
+          await prisma.notification.create({
+            data: {
+              userId: leave.student.userId,
+              message: `Your leave application has been escalated to the Faculty department due to no response in 24 hours.`,
+              type: 'ESCALATION'
+            }
+          });
+
+          escalatedCount++;
+        }
       }
     }
 

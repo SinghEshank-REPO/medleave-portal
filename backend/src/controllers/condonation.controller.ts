@@ -7,7 +7,7 @@ import { Role, CondonationStatus } from '../types';
 export class CondonationController {
   static async listPending(req: AuthenticatedRequest, res: Response) {
     try {
-      if (!req.user || !['FACULTY', 'ADVISOR', 'HOD'].includes(req.user.role)) {
+      if (!req.user || !['FACULTY', 'HOD'].includes(req.user.role)) {
         return res.status(403).json({ message: 'Only faculty members can access condonation logs.' });
       }
 
@@ -64,7 +64,7 @@ export class CondonationController {
         return res.status(400).json({ message: 'Action must be CONDONE or REJECT.' });
       }
 
-      if (!req.user || !['FACULTY', 'ADVISOR', 'HOD'].includes(req.user.role)) {
+      if (!req.user || !['FACULTY', 'HOD'].includes(req.user.role)) {
         return res.status(403).json({ message: 'Only faculty members can process condonations.' });
       }
 

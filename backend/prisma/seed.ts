@@ -1,5 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const prisma = new PrismaClient();
 
@@ -101,31 +106,11 @@ async function main() {
         userId: u.id,
         departmentId: cseDept.id,
         designation: 'Assistant Professor',
-        isHOD: false,
-        isAdvisor: false
+        isHOD: false
       }
     });
     facultyProfiles[f.code] = prof;
   }
-
-  // Create Faculty Advisor User
-  const advisorUser = await prisma.user.create({
-    data: {
-      email: 'advisor@juit.ac.in',
-      name: 'Dr. P. K. Bansal (CSE Advisor)',
-      passwordHash,
-      role: 'ADVISOR'
-    }
-  });
-
-  const advisorProfile = await prisma.faculty.create({
-    data: {
-      userId: advisorUser.id,
-      departmentId: cseDept.id,
-      designation: 'Associate Professor & CSE Advisor',
-      isAdvisor: true
-    }
-  });
 
   // Create HOD User
   const hodUser = await prisma.user.create({
@@ -146,7 +131,7 @@ async function main() {
     }
   });
 
-  console.log('Created Faculty profiles, HOD, and Advisor.');
+  console.log('Created Faculty profiles and HOD.');
 
   // 6. Create Courses for CSE
   const coursesData = [
@@ -271,7 +256,7 @@ async function main() {
       status: 'APPROVED',
       healthCentreApproved: true,
       wardenApproved: true,
-      advisorApproved: true,
+      facultyApproved: true,
       remarks: 'All documents verified and condonations completed.',
       currentApproverRole: 'FACULTY'
     }
@@ -344,8 +329,8 @@ async function main() {
   });
   await prisma.auditLog.create({
     data: {
-      userId: advisorUser.id,
-      action: 'APPROVE_ADVISOR_LEAVE',
+      userId: facultyProfiles['CSE-301'].userId,
+      action: 'APPROVE_FACULTY_LEAVE',
       details: JSON.stringify({ leaveApplicationId: pastLeave.id })
     }
   });

@@ -102,6 +102,11 @@ export default function ApproverLeaveReviewPage({ params }: PageProps) {
   // Highlight mismatches
   const nameMismatch = ai && studentUser && ai.patientName && !studentUser.name.toLowerCase().includes(ai.patientName.toLowerCase());
 
+  const isCurrentApprover = 
+    (leave.status === 'PENDING_HEALTH_CENTRE' && user?.role === 'MED_OFFICER') ||
+    (leave.status === 'PENDING_WARDEN' && user?.role === 'WARDEN') ||
+    (leave.status === 'PENDING_FACULTY' && user?.role === 'FACULTY');
+
   return (
     <NavbarFrame>
       <div className="space-y-6">
@@ -345,46 +350,48 @@ export default function ApproverLeaveReviewPage({ params }: PageProps) {
             </div>
 
             {/* Decision Submission Panel */}
-            <div className="glass-panel p-6 rounded-2xl border border-white/5 space-y-4 text-xs">
-              <h3 className="font-bold text-white text-sm">Submit Decision</h3>
-              
-              <div className="space-y-1">
-                <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Remarks / Remarks history</label>
-                <textarea
-                  rows={3}
-                  value={remarks}
-                  onChange={(e) => setRemarks(e.target.value)}
-                  placeholder="Enter approval details, reject reasons, or what clarification is required..."
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:border-medical-500 placeholder-slate-600 resize-none"
-                />
-              </div>
+            {isCurrentApprover && (
+              <div className="glass-panel p-6 rounded-2xl border border-white/5 space-y-4 text-xs">
+                <h3 className="font-bold text-white text-sm">Submit Decision</h3>
+                
+                <div className="space-y-1">
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Remarks / Remarks history</label>
+                  <textarea
+                    rows={3}
+                    value={remarks}
+                    onChange={(e) => setRemarks(e.target.value)}
+                    placeholder="Enter approval details, reject reasons, or what clarification is required..."
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs focus:outline-none focus:border-medical-500 placeholder-slate-600 resize-none"
+                  />
+                </div>
 
-              <div className="space-y-2 pt-2">
-                <button
-                  onClick={() => handleAction('APPROVE')}
-                  disabled={actionLoading}
-                  className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold flex items-center justify-center gap-1.5 transition active:scale-[0.98] disabled:opacity-50"
-                >
-                  <Check className="w-4 h-4" /> Approve Leave
-                </button>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2 pt-2">
                   <button
-                    onClick={() => handleAction('CLARIFY')}
+                    onClick={() => handleAction('APPROVE')}
                     disabled={actionLoading}
-                    className="py-2.5 rounded-xl border border-slate-850 hover:bg-slate-800/40 text-slate-300 font-semibold flex items-center justify-center gap-1.5 transition active:scale-[0.98]"
+                    className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold flex items-center justify-center gap-1.5 transition active:scale-[0.98] disabled:opacity-50"
                   >
-                    <HelpCircle className="w-4 h-4" /> Clarify
+                    <Check className="w-4 h-4" /> Approve Leave
                   </button>
-                  <button
-                    onClick={() => handleAction('REJECT')}
-                    disabled={actionLoading}
-                    className="py-2.5 rounded-xl bg-red-600/10 border border-red-500/20 hover:bg-red-600 hover:text-white text-red-400 font-semibold flex items-center justify-center gap-1.5 transition active:scale-[0.98]"
-                  >
-                    <X className="w-4 h-4" /> Reject
-                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => handleAction('CLARIFY')}
+                      disabled={actionLoading}
+                      className="py-2.5 rounded-xl border border-slate-850 hover:bg-slate-800/40 text-slate-300 font-semibold flex items-center justify-center gap-1.5 transition active:scale-[0.98]"
+                    >
+                      <HelpCircle className="w-4 h-4" /> Clarify
+                    </button>
+                    <button
+                      onClick={() => handleAction('REJECT')}
+                      disabled={actionLoading}
+                      className="py-2.5 rounded-xl bg-red-600/10 border border-red-500/20 hover:bg-red-600 hover:text-white text-red-400 font-semibold flex items-center justify-center gap-1.5 transition active:scale-[0.98]"
+                    >
+                      <X className="w-4 h-4" /> Reject
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
           </div>
         </div>

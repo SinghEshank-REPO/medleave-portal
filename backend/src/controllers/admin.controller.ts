@@ -106,7 +106,7 @@ export class AdminController {
       const pendingCount = await prisma.leaveApplication.count({
         where: {
           status: {
-            in: ['PENDING_HEALTH_CENTRE', 'PENDING_WARDEN', 'PENDING_ADVISOR']
+            in: ['PENDING_HEALTH_CENTRE', 'PENDING_WARDEN', 'PENDING_FACULTY']
           }
         }
       });
