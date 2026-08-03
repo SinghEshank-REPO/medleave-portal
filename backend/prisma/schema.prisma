@@ -1,6 +1,6 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 generator client {
@@ -122,6 +122,8 @@ model LeaveApplication {
   isProxy               Boolean           @default(false)
   proxyName             String?
   proxyRelationship     String?
+  proxyRollNumber       String?
+  proxyIdProofUrl       String?
   
   // Approval pipeline state
   status                String            @default("PENDING_HEALTH_CENTRE") // PENDING_HEALTH_CENTRE, PENDING_WARDEN, PENDING_FACULTY, APPROVED, REJECTED, CLARIFICATION_REQUESTED

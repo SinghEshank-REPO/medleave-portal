@@ -22,6 +22,7 @@ export class LeaveController {
         isProxy,
         proxyName,
         proxyRelationship,
+        proxyRollNumber,
         startOption, // 'FULL' or 'AFTERNOON'
         endOption    // 'FULL' or 'MORNING'
       } = req.body;
@@ -30,7 +31,11 @@ export class LeaveController {
         return res.status(400).json({ message: 'Start date, end date, reason, and category are required.' });
       }
 
-      if (!req.file) {
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+      const certificateFile = files?.certificate?.[0] || req.file;
+      const proxyIdFile = files?.proxyIdProof?.[0];
+
+      if (!certificateFile) {
         return res.status(400).json({ message: 'Medical certificate document upload is required.' });
       }
 
@@ -52,7 +57,14 @@ export class LeaveController {
       }
 
       // 1. Upload medical certificate to file storage
-      const storageResult = await FileStorageService.uploadFile(req.file.path, req.file.originalname);
+      const storageResult = await FileStorageService.uploadFile(certificateFile.path, certificateFile.originalname);
+
+      // Upload proxy ID proof document if present
+      let proxyIdProofUrl: string | null = null;
+      if (proxyIdFile) {
+        const proxyStorage = await FileStorageService.uploadFile(proxyIdFile.path, proxyIdFile.originalname);
+        proxyIdProofUrl = proxyStorage.url;
+      }
 
       // 2. Set SLA Deadlines
       const now = new Date();
@@ -70,14 +82,16 @@ export class LeaveController {
           isProxy: isProxy === 'true' || isProxy === true,
           proxyName: proxyName || null,
           proxyRelationship: proxyRelationship || null,
+          proxyRollNumber: proxyRollNumber || null,
+          proxyIdProofUrl: proxyIdProofUrl || null,
           status: 'PENDING_HEALTH_CENTRE',
           currentApproverRole: 'MED_OFFICER',
           healthCentreDeadline,
           documents: {
             create: {
               fileUrl: storageResult.url,
-              fileType: req.file.mimetype.split('/')[1].toUpperCase(),
-              originalName: req.file.originalname
+              fileType: certificateFile.mimetype.split('/')[1].toUpperCase(),
+              originalName: certificateFile.originalname
             }
           }
         },
@@ -479,7 +493,7 @@ export class LeaveController {
             });
           }
         }
-        await this.triggerCondonationNotifications(id);
+        await LeaveController.triggerCondonationNotifications(id);
       } else if (updatedStatus === 'PENDING_WARDEN' || updatedStatus === 'PENDING_FACULTY') {
         // Notify the next reviewer role
         const approverUsers = await prisma.user.findMany({ where: { role: nextApproverRole } });

@@ -7,7 +7,7 @@ const router = Router();
 
 router.use(authenticateJWT);
 
-router.post('/', upload.single('certificate'), LeaveController.apply);
+router.post('/', upload.fields([{ name: 'certificate', maxCount: 1 }, { name: 'proxyIdProof', maxCount: 1 }]), LeaveController.apply);
 router.get('/', LeaveController.list);
 router.get('/:id', LeaveController.getDetails);
 router.post('/:id/review', LeaveController.review);
