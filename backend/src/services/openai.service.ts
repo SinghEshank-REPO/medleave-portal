@@ -3,12 +3,27 @@ import path from 'path';
 import { env } from '../config/env';
 import { DocumentStatus } from '../types';
 
-function getEffectiveGeminiKey(): string {
-  const envKey = env.GEMINI.API_KEY || '';
-  if (envKey && envKey.length > 20 && !envKey.toLowerCase().includes('mock')) {
-    return envKey;
+function cleanKey(k: string | undefined): string {
+  if (!k) return '';
+  return k.trim().replace(/^["']|["']$/g, '').replace(/[\r\n\t]/g, '').trim();
+}
+
+function getCandidateKeys(): string[] {
+  const verifiedKey = Buffer.from('QVEuQWI4Uk42S3lNSGtwcGctQmc8dE44RU9USEpxUTRaemVuU09uNTlwY2R4SHdZSzlyYUE=', 'base64').toString('utf-8');
+  const envGemini = cleanKey(env.GEMINI.API_KEY);
+  const envOpenAI = cleanKey(env.OPENAI.API_KEY);
+  const processGemini = cleanKey(process.env.GEMINI_API_KEY);
+  const processOpenAI = cleanKey(process.env.OPENAI_API_KEY);
+
+  const keys: string[] = [verifiedKey];
+
+  for (const k of [envGemini, envOpenAI, processGemini, processOpenAI]) {
+    if (k && k.length > 15 && !k.toLowerCase().includes('mock') && !keys.includes(k)) {
+      keys.push(k);
+    }
   }
-  return Buffer.from('QVEuQWI4Uk42S3lNSGtwcGctQmc8dE44RU9USEpxUTRaemVuU09uNTlwY2R4SHdZSzlyYUE=', 'base64').toString('utf-8');
+
+  return keys;
 }
 
 export interface AIAnalysisResult {
@@ -58,7 +73,6 @@ export class AIService {
     studentName: string,
     directPayload?: { base64Data: string; mimeType: string }
   ): Promise<AIAnalysisResult> {
-    const apiKey = getEffectiveGeminiKey();
     console.log(`[AIService] Starting Gemini AI visual scan for student "${studentName}" on file: ${filePathOrUrl}`);
 
     let base64Data: string | null = directPayload?.base64Data || null;
@@ -111,6 +125,7 @@ export class AIService {
       };
     }
 
+    const keys = getCandidateKeys();
     const geminiModels = ['gemini-2.5-flash', 'gemini-3.5-flash', 'gemini-2.0-flash', 'gemini-flash-latest'];
     
     const promptText = `You are a professional medical document authenticity verification AI.
@@ -140,79 +155,81 @@ Output ONLY a valid raw JSON object (with no markdown fences) in this exact stru
 
     let lastHttpError = '';
 
-    for (const model of geminiModels) {
-      try {
-        console.log(`[AIService] Sending visual prompt & image payload to Gemini API (${model})...`);
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                { text: promptText },
-                {
-                  inline_data: {
-                    mime_type: mimeType,
-                    data: base64Data
+    for (const key of keys) {
+      for (const model of geminiModels) {
+        try {
+          console.log(`[AIService] Sending visual prompt & image payload to Gemini API (${model}) using key prefix ${key.substring(0, 8)}...`);
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: promptText },
+                  {
+                    inline_data: {
+                      mime_type: mimeType,
+                      data: base64Data
+                    }
                   }
-                }
-              ]
-            }],
-            generationConfig: { response_mime_type: 'application/json' }
-          })
-        });
+                ]
+              }],
+              generationConfig: { response_mime_type: 'application/json' }
+            })
+          });
 
-        if (res.ok) {
-          const data: any = await res.json();
-          const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          console.log(`[AIService] Gemini AI (${model}) raw response received:`, rawText.substring(0, 200));
+          if (res.ok) {
+            const data: any = await res.json();
+            const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            console.log(`[AIService] Gemini AI (${model}) raw response received:`, rawText.substring(0, 200));
 
-          const parsed = extractJsonFromText(rawText);
+            const parsed = extractJsonFromText(rawText);
 
-          if (parsed) {
-            const scoreRaw = Number(parsed.authenticityScore !== undefined ? parsed.authenticityScore : 0);
-            const scoreVal = Math.min(100, Math.max(0, scoreRaw));
-            const normalizedConfidence = parseFloat((scoreVal / 100).toFixed(2));
+            if (parsed) {
+              const scoreRaw = Number(parsed.authenticityScore !== undefined ? parsed.authenticityScore : 0);
+              const scoreVal = Math.min(100, Math.max(0, scoreRaw));
+              const normalizedConfidence = parseFloat((scoreVal / 100).toFixed(2));
 
-            console.log(`[AIService] Gemini AI (${model}) visual scan complete! Score: ${scoreVal}/100 (${scoreVal}% Real), Status: ${parsed.status}`);
+              console.log(`[AIService] Gemini AI (${model}) visual scan complete! Score: ${scoreVal}/100 (${scoreVal}% Real), Status: ${parsed.status}`);
 
-            return {
-              patientName: parsed.patientName || 'Unknown',
-              doctorName: parsed.doctorName || 'N/A',
-              hospitalName: parsed.hospitalName || 'N/A',
-              diagnosis: parsed.diagnosis || 'N/A',
-              restDays: Number(parsed.restDays) || 0,
-              confidenceScore: normalizedConfidence,
-              autoSummary: parsed.autoSummary || `Gemini visual analysis completed. Score: ${scoreVal}% Real.`,
-              status: parsed.status === 'VALID' && scoreVal >= 75 ? 'VALID' : 'SUSPICIOUS',
-              fraudAlerts: parsed.fraudAlerts || []
-            };
-          } else if (rawText) {
-            // Text received but not JSON format - analyze keywords directly
-            const lower = rawText.toLowerCase();
-            const isNegative = lower.includes('not a medical') || lower.includes('blank') || lower.includes('food') || lower.includes('fake') || lower.includes('black') || lower.includes('invalid');
-            const scoreVal = isNegative ? 0 : 85;
+              return {
+                patientName: parsed.patientName || 'Unknown',
+                doctorName: parsed.doctorName || 'N/A',
+                hospitalName: parsed.hospitalName || 'N/A',
+                diagnosis: parsed.diagnosis || 'N/A',
+                restDays: Number(parsed.restDays) || 0,
+                confidenceScore: normalizedConfidence,
+                autoSummary: parsed.autoSummary || `Gemini visual analysis completed. Score: ${scoreVal}% Real.`,
+                status: parsed.status === 'VALID' && scoreVal >= 75 ? 'VALID' : 'SUSPICIOUS',
+                fraudAlerts: parsed.fraudAlerts || []
+              };
+            } else if (rawText) {
+              // Text received but not JSON format - analyze keywords directly
+              const lower = rawText.toLowerCase();
+              const isNegative = lower.includes('not a medical') || lower.includes('blank') || lower.includes('food') || lower.includes('fake') || lower.includes('black') || lower.includes('invalid');
+              const scoreVal = isNegative ? 0 : 85;
 
-            return {
-              patientName: studentName,
-              doctorName: 'N/A',
-              hospitalName: 'N/A',
-              diagnosis: isNegative ? 'Invalid / Blank Document' : 'Medical Certificate',
-              restDays: isNegative ? 0 : 3,
-              confidenceScore: isNegative ? 0.00 : 0.85,
-              autoSummary: rawText.substring(0, 250),
-              status: isNegative ? 'SUSPICIOUS' : 'VALID',
-              fraudAlerts: isNegative ? ['Gemini flagged document as non-medical or unreadable.'] : []
-            };
+              return {
+                patientName: studentName,
+                doctorName: 'N/A',
+                hospitalName: 'N/A',
+                diagnosis: isNegative ? 'Invalid / Blank Document' : 'Medical Certificate',
+                restDays: isNegative ? 0 : 3,
+                confidenceScore: isNegative ? 0.00 : 0.85,
+                autoSummary: rawText.substring(0, 250),
+                status: isNegative ? 'SUSPICIOUS' : 'VALID',
+                fraudAlerts: isNegative ? ['Gemini flagged document as non-medical or unreadable.'] : []
+              };
+            }
+          } else {
+            const errText = await res.text();
+            lastHttpError = `HTTP ${res.status}: ${errText.substring(0, 150)}`;
+            console.warn(`[AIService] Gemini API (${model}) returned HTTP status ${res.status}:`, errText);
           }
-        } else {
-          const errText = await res.text();
-          lastHttpError = `HTTP ${res.status}: ${errText.substring(0, 150)}`;
-          console.warn(`[AIService] Gemini API (${model}) returned HTTP status ${res.status}:`, errText);
+        } catch (err: any) {
+          console.error(`[AIService] Error executing Gemini model ${model}:`, err?.message || err);
+          lastHttpError = err?.message || 'Network fetch error';
         }
-      } catch (err: any) {
-        console.error(`[AIService] Error executing Gemini model ${model}:`, err?.message || err);
-        lastHttpError = err?.message || 'Network fetch error';
       }
     }
 
