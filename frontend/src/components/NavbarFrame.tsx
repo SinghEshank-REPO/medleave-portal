@@ -225,8 +225,8 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
       {/* Main Layout Grid */}
       <div className="pt-16 min-h-screen flex">
         {/* Sidebar Nav */}
-        <aside className={`fixed md:sticky top-16 bottom-0 left-0 w-64 glass-panel border-r border-white/5 md:block transform transition-transform duration-300 z-30 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-          <div className="flex flex-col justify-between h-[calc(100vh-4rem)] p-4">
+        <aside className={`fixed md:sticky top-16 left-0 h-[calc(100vh-4rem)] w-64 glass-panel border-r border-white/5 md:block transform transition-transform duration-300 z-30 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+          <div className="flex flex-col justify-between h-full p-4">
             <div className="space-y-6">
               {/* Profile card summary */}
               <div className="p-4 rounded-xl bg-slate-900/40 border border-white/5 flex items-center gap-3">
@@ -262,14 +262,16 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
               </nav>
             </div>
 
-            {/* Logout button bottom */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-red-500/10 hover:text-red-400 transition text-xs font-semibold text-left w-full"
-            >
-              <LogOut className="w-4.5 h-4.5" />
-              <span>Log Out</span>
-            </button>
+            {/* Logout button bottom (Firmly anchored to bottom left) */}
+            <div className="mt-auto pt-4 border-t border-white/5">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition text-xs font-semibold text-left w-full"
+              >
+                <LogOut className="w-4.5 h-4.5" />
+                <span>Log Out</span>
+              </button>
+            </div>
           </div>
         </aside>
 

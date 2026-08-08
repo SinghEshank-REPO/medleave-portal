@@ -156,9 +156,22 @@ export default function ApproverLeaveReviewPage({ params }: PageProps) {
               </div>
 
               {leave.isProxy && (
-                <div className="p-3 rounded-lg border border-white/5 bg-slate-900/30">
-                  <span className="font-semibold text-slate-400">Proxy submission details: </span>
-                  <span className="text-white">Submitted by {leave.proxyName} (Relationship: {leave.proxyRelationship})</span>
+                <div className="p-3 rounded-lg border border-white/5 bg-slate-900/30 flex justify-between items-center flex-wrap gap-2 text-xs">
+                  <div>
+                    <span className="font-semibold text-slate-400">Proxy Submission Details: </span>
+                    <span className="text-white font-medium">Submitted by {leave.proxyName} ({leave.proxyRelationship === 'Student' ? 'Fellow Student' : leave.proxyRelationship})</span>
+                    {leave.proxyRollNumber && <span className="text-slate-400 font-mono ml-2">(Roll: {leave.proxyRollNumber})</span>}
+                  </div>
+                  {leave.proxyIdProofUrl && (
+                    <a
+                      href={leave.proxyIdProofUrl.startsWith('/') ? `http://localhost:5000${leave.proxyIdProofUrl}` : leave.proxyIdProofUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-medical-400 hover:text-medical-300 font-semibold underline"
+                    >
+                      View Submitter ID Proof ↗
+                    </a>
+                  )}
                 </div>
               )}
             </div>

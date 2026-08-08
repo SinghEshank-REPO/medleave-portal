@@ -19,6 +19,9 @@ export default function ApplyLeavePage() {
   const [isProxy, setIsProxy] = useState(false);
   const [proxyName, setProxyName] = useState('');
   const [proxyRelationship, setProxyRelationship] = useState('Parent');
+  const [proxyRollNumber, setProxyRollNumber] = useState('');
+  const [proxyIdFile, setProxyIdFile] = useState<File | null>(null);
+  const [proxyIdFileName, setProxyIdFileName] = useState('');
   
   const [startOption, setStartOption] = useState('FULL');
   const [endOption, setEndOption] = useState('FULL');
@@ -97,8 +100,26 @@ export default function ApplyLeavePage() {
     formData.append('isProxy', String(isProxy));
     
     if (isProxy) {
+      if (!proxyName.trim()) {
+        setError('Please enter the submitter name.');
+        setLoading(false);
+        return;
+      }
       formData.append('proxyName', proxyName);
       formData.append('proxyRelationship', proxyRelationship);
+      
+      if (proxyRelationship === 'Student') {
+        if (!proxyRollNumber.trim()) {
+          setError('Please enter the proxy student roll number.');
+          setLoading(false);
+          return;
+        }
+        formData.append('proxyRollNumber', proxyRollNumber);
+      }
+
+      if (proxyIdFile) {
+        formData.append('proxyIdProof', proxyIdFile);
+      }
     }
     
     formData.append('startOption', startOption);
@@ -232,44 +253,94 @@ export default function ApplyLeavePage() {
               </div>
 
               {/* Proxy Submissions */}
-              <div className="p-4 rounded-xl border border-white/5 bg-slate-950/20 space-y-3">
+              <div className="p-4 rounded-xl border border-white/5 bg-slate-950/20 space-y-4">
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     id="proxyCheck"
                     checked={isProxy}
                     onChange={(e) => setIsProxy(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-800 text-medical-500 focus:ring-medical-500"
+                    className="w-4 h-4 rounded border-slate-800 text-medical-500 focus:ring-medical-500 cursor-pointer"
                   />
                   <label htmlFor="proxyCheck" className="text-xs font-semibold text-slate-300 select-none cursor-pointer">
-                    This is a Proxy Submission (Submitted by Parent/Guardian/Peer)
+                    This is a Proxy Submission (Submitted on behalf of student)
                   </label>
                 </div>
 
                 {isProxy && (
-                  <div className="grid grid-cols-2 gap-3 pt-2">
-                    <div className="space-y-1">
-                      <label className="text-xs text-slate-500">Submitter Name</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="E.g. Ramesh Sen"
-                        value={proxyName}
-                        onChange={(e) => setProxyName(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white"
-                      />
+                  <div className="space-y-4 pt-2 border-t border-white/5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-xs text-slate-400 font-medium">Relationship to Student</label>
+                        <select
+                          value={proxyRelationship}
+                          onChange={(e) => setProxyRelationship(e.target.value)}
+                          className="w-full px-3 py-2.5 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-medical-500"
+                        >
+                          <option value="Parent">Parent / Guardian</option>
+                          <option value="Student">Fellow Student</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs text-slate-400 font-medium">Submitter Full Name</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder={proxyRelationship === 'Student' ? "E.g. Rahul Sharma" : "E.g. Ramesh Sen"}
+                          value={proxyName}
+                          onChange={(e) => setProxyName(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-medical-500"
+                        />
+                      </div>
                     </div>
+
+                    {proxyRelationship === 'Student' && (
+                      <div className="space-y-1">
+                        <label className="text-xs text-slate-400 font-medium">Submitter Student Roll Number</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="E.g. 211045"
+                          value={proxyRollNumber}
+                          onChange={(e) => setProxyRollNumber(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs focus:outline-none focus:border-medical-500"
+                        />
+                      </div>
+                    )}
+
+                    {/* ID Proof Document Upload */}
                     <div className="space-y-1">
-                      <label className="text-xs text-slate-500">Relationship</label>
-                      <select
-                        value={proxyRelationship}
-                        onChange={(e) => setProxyRelationship(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white"
-                      >
-                        <option value="Parent">Parent</option>
-                        <option value="Guardian">Local Guardian</option>
-                        <option value="Peer">Fellow Student</option>
-                      </select>
+                      <label className="text-xs text-slate-400 font-medium flex items-center justify-between">
+                        <span>{proxyRelationship === 'Student' ? 'Student ID Card / Proof Upload' : 'Parent ID / Verification Proof Upload'}</span>
+                        <span className="text-[10px] text-slate-500">(Optional / PDF, PNG, JPG)</span>
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <label className="flex-1 px-3 py-2.5 bg-slate-900 border border-slate-800 hover:border-medical-500/50 rounded-lg text-slate-300 text-xs cursor-pointer flex items-center justify-between transition">
+                          <span className="truncate">{proxyIdFileName || `Click to attach ${proxyRelationship === 'Student' ? 'Student ID Card' : 'ID Proof'}...`}</span>
+                          <Upload className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                          <input
+                            type="file"
+                            accept=".pdf,.png,.jpg,.jpeg"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files.length > 0) {
+                                setProxyIdFile(e.target.files[0]);
+                                setProxyIdFileName(e.target.files[0].name);
+                              }
+                            }}
+                            className="hidden"
+                          />
+                        </label>
+                        {proxyIdFileName && (
+                          <button
+                            type="button"
+                            onClick={() => { setProxyIdFile(null); setProxyIdFileName(''); }}
+                            className="text-xs text-red-400 hover:text-red-300 font-semibold px-2"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
