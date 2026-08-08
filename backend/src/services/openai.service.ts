@@ -9,7 +9,7 @@ function cleanKey(k: string | undefined): string {
 }
 
 function getCandidateKeys(): string[] {
-  const verifiedKey = Buffer.from('QVEuQWI4Uk42S3lNSGtwcGctQmc8dE44RU9USEpxUTRaemVuU09uNTlwY2R4SHdZSzlyYUE=', 'base64').toString('utf-8');
+  const verifiedKey = Buffer.from('QVEuQWI4Uk42S3lNSGtwcGctQmc4dE44RU9USEpxUTRaemVuU09uNTlwY2R4SHdZSzlyYUE=', 'base64').toString('utf-8');
   const envGemini = cleanKey(env.GEMINI.API_KEY);
   const envOpenAI = cleanKey(env.OPENAI.API_KEY);
   const processGemini = cleanKey(process.env.GEMINI_API_KEY);
