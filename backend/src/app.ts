@@ -19,7 +19,7 @@ app.use(cors({
 app.use(express.json());
 
 // Ensure uploads folder exists and serve it statically for local mocks
-const uploadsDir = path.join(__dirname, '../uploads');
+const uploadsDir = path.resolve(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }

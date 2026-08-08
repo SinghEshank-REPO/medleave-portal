@@ -25,7 +25,7 @@ export class FileStorageService {
       console.log(`[FileStorageService] Mock mode: Simulating upload of ${originalName}`);
       
       // Ensure the mock upload output directory exists (static assets served by Express)
-      const mockDir = path.join(__dirname, '../../uploads');
+      const mockDir = path.resolve(process.cwd(), 'uploads');
       if (!fs.existsSync(mockDir)) {
         fs.mkdirSync(mockDir, { recursive: true });
       }
