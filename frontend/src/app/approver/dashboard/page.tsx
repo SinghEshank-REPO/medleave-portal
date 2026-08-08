@@ -159,10 +159,16 @@ export default function ApproverDashboard() {
                         <td className="py-4">
                           {aiScore !== undefined ? (
                             <div className="flex items-center gap-1.5">
-                              <span className={`font-mono font-bold ${aiStatus === 'SUSPICIOUS' ? 'text-red-400' : 'text-emerald-400'}`}>
-                                {(aiScore * 100).toFixed(0)}%
+                              <span className={`px-2 py-0.5 rounded border text-[10px] font-bold font-mono ${
+                                Math.round(aiScore * 100) >= 75 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                                Math.round(aiScore * 100) >= 50 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 
+                                'bg-red-500/10 text-red-400 border-red-500/20'
+                              }`}>
+                                {Math.round(aiScore * 100)}/100 ({Math.round(aiScore * 100)}% Real)
                               </span>
-                              <span className="text-[10px] text-slate-500">({aiStatus})</span>
+                              {aiStatus === 'SUSPICIOUS' && (
+                                <span className="px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 text-[8px] font-bold">Flagged</span>
+                              )}
                             </div>
                           ) : (
                             <span className="text-slate-500 font-medium italic">Pending AI</span>

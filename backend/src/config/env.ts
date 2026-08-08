@@ -16,6 +16,9 @@ export const env = {
     API_KEY: process.env.CLOUDINARY_API_KEY || 'mock',
     API_SECRET: process.env.CLOUDINARY_API_SECRET || 'mock'
   },
+  GEMINI: {
+    API_KEY: process.env.GEMINI_API_KEY || ''
+  },
   OPENAI: {
     API_KEY: process.env.OPENAI_API_KEY || 'mock'
   }

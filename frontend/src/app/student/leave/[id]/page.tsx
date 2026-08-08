@@ -428,12 +428,25 @@ export default function StudentLeaveDetailsPage({ params }: PageProps) {
                   </div>
 
                   <div>
-                    <p className="text-slate-500 text-[10px]">Authenticity Confidence</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="h-2 flex-1 bg-slate-800 rounded-full overflow-hidden">
-                        <div className={`h-full ${ai.confidenceScore > 0.75 ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${ai.confidenceScore * 100}%` }} />
-                      </div>
-                      <span className="font-bold text-white text-[11px] font-mono">{(ai.confidenceScore * 100).toFixed(0)}%</span>
+                    <div className="flex justify-between items-center text-[10px] mb-1">
+                      <span className="text-slate-400 font-medium">AI Authenticity Score</span>
+                      <span className={`font-extrabold font-mono text-[10px] px-2 py-0.5 rounded border ${
+                        Math.round(ai.confidenceScore * 100) >= 75 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                        Math.round(ai.confidenceScore * 100) >= 50 ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 
+                        'bg-red-500/10 text-red-400 border-red-500/20'
+                      }`}>
+                        {Math.round(ai.confidenceScore * 100)}/100 ({Math.round(ai.confidenceScore * 100)}% Real)
+                      </span>
+                    </div>
+                    <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-500 ${
+                          Math.round(ai.confidenceScore * 100) >= 75 ? 'bg-emerald-500' : 
+                          Math.round(ai.confidenceScore * 100) >= 50 ? 'bg-amber-500' : 
+                          'bg-red-500'
+                        }`}
+                        style={{ width: `${Math.round(ai.confidenceScore * 100)}%` }}
+                      />
                     </div>
                   </div>
 
