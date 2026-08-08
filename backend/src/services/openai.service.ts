@@ -22,37 +22,43 @@ export class AIService {
    * Performs real visual OCR and authenticity analysis on a medical certificate using Google Gemini AI.
    * Gemini visually scans the uploaded image/PDF and decides the authenticity score out of 100.
    */
-  static async analyzeCertificate(filePathOrUrl: string, studentName: string): Promise<AIAnalysisResult> {
+  static async analyzeCertificate(
+    filePathOrUrl: string, 
+    studentName: string,
+    directPayload?: { base64Data: string; mimeType: string }
+  ): Promise<AIAnalysisResult> {
     console.log(`[AIService] Starting Gemini AI visual scan for student "${studentName}" on file: ${filePathOrUrl}`);
 
-    let base64Data: string | null = null;
-    let mimeType = 'image/jpeg';
+    let base64Data: string | null = directPayload?.base64Data || null;
+    let mimeType = directPayload?.mimeType || 'image/jpeg';
 
-    try {
-      let targetPath = filePathOrUrl;
-      if (filePathOrUrl.startsWith('/uploads/') || filePathOrUrl.startsWith('uploads/')) {
-        const cleanPath = filePathOrUrl.startsWith('/') ? filePathOrUrl.substring(1) : filePathOrUrl;
-        targetPath = path.resolve(process.cwd(), cleanPath);
-      }
-
-      if (fs.existsSync(targetPath)) {
-        const buffer = fs.readFileSync(targetPath);
-        base64Data = buffer.toString('base64');
-        const ext = path.extname(targetPath).toLowerCase();
-        if (ext === '.pdf') mimeType = 'application/pdf';
-        else if (ext === '.png') mimeType = 'image/png';
-        else if (ext === '.jpg' || ext === '.jpeg') mimeType = 'image/jpeg';
-      } else if (filePathOrUrl.startsWith('http://') || filePathOrUrl.startsWith('https://')) {
-        const response = await fetch(filePathOrUrl);
-        if (response.ok) {
-          const arrayBuffer = await response.arrayBuffer();
-          base64Data = Buffer.from(arrayBuffer).toString('base64');
-          const contentType = response.headers.get('content-type');
-          if (contentType) mimeType = contentType;
+    if (!base64Data) {
+      try {
+        let targetPath = filePathOrUrl;
+        if (filePathOrUrl.startsWith('/uploads/') || filePathOrUrl.startsWith('uploads/')) {
+          const cleanPath = filePathOrUrl.startsWith('/') ? filePathOrUrl.substring(1) : filePathOrUrl;
+          targetPath = path.resolve(process.cwd(), cleanPath);
         }
+
+        if (fs.existsSync(targetPath)) {
+          const buffer = fs.readFileSync(targetPath);
+          base64Data = buffer.toString('base64');
+          const ext = path.extname(targetPath).toLowerCase();
+          if (ext === '.pdf') mimeType = 'application/pdf';
+          else if (ext === '.png') mimeType = 'image/png';
+          else if (ext === '.jpg' || ext === '.jpeg') mimeType = 'image/jpeg';
+        } else if (filePathOrUrl.startsWith('http://') || filePathOrUrl.startsWith('https://')) {
+          const response = await fetch(filePathOrUrl);
+          if (response.ok) {
+            const arrayBuffer = await response.arrayBuffer();
+            base64Data = Buffer.from(arrayBuffer).toString('base64');
+            const contentType = response.headers.get('content-type');
+            if (contentType) mimeType = contentType;
+          }
+        }
+      } catch (e) {
+        console.error('[AIService] Failed to read uploaded file buffer for Gemini:', e);
       }
-    } catch (e) {
-      console.error('[AIService] Failed to read uploaded file buffer for Gemini:', e);
     }
 
     if (!base64Data) {

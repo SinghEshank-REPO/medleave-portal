@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import NavbarFrame from '@/components/NavbarFrame';
-import { api } from '@/lib/api';
+import { api, getAssetUrl } from '@/lib/api';
 import { 
   ArrowLeft, FileText, CheckCircle2, Clock, XCircle, AlertCircle, 
   Send, ShieldAlert, Calendar, Check, X, HelpCircle, MessageSquare 
@@ -188,7 +188,7 @@ export default function ApproverLeaveReviewPage({ params }: PageProps) {
                     <FileText className="w-16 h-16 text-slate-600 mx-auto mb-2" />
                     <p className="text-xs text-slate-400">PDF Document attachment uploaded.</p>
                     <a
-                      href={doc.fileUrl.startsWith('/') ? `http://localhost:5000${doc.fileUrl}` : doc.fileUrl}
+                      href={getAssetUrl(doc?.fileUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-block mt-4 px-4 py-2 bg-slate-900 border border-slate-800 hover:border-medical-500/50 text-medical-400 rounded-lg text-xs font-semibold transition"
@@ -199,12 +199,12 @@ export default function ApproverLeaveReviewPage({ params }: PageProps) {
                 ) : (
                   <div className="space-y-4 w-full">
                     <img
-                      src={doc?.fileUrl?.startsWith('/') ? `http://localhost:5000${doc.fileUrl}` : doc?.fileUrl}
+                      src={getAssetUrl(doc?.fileUrl)}
                       alt="Medical certificate preview"
                       className="max-h-96 object-contain rounded border border-slate-800 mx-auto shadow-lg"
                     />
                     <a
-                      href={doc?.fileUrl?.startsWith('/') ? `http://localhost:5000${doc.fileUrl}` : doc?.fileUrl}
+                      href={getAssetUrl(doc?.fileUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full py-2 border border-slate-800 text-center rounded-lg hover:border-medical-500/40 text-medical-400 text-xs font-semibold block transition"

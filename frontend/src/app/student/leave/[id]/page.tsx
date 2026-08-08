@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import NavbarFrame from '@/components/NavbarFrame';
-import { api } from '@/lib/api';
+import { api, getAssetUrl } from '@/lib/api';
 import { 
   ArrowLeft, FileText, CheckCircle2, Clock, XCircle, AlertCircle, 
   Send, ShieldCheck, Calendar, Download, MessageSquare 
@@ -208,7 +208,7 @@ export default function StudentLeaveDetailsPage({ params }: PageProps) {
                     </div>
                     {leave.proxyIdProofUrl && (
                       <a
-                        href={leave.proxyIdProofUrl.startsWith('/') ? `http://localhost:5000${leave.proxyIdProofUrl}` : leave.proxyIdProofUrl}
+                        href={getAssetUrl(leave.proxyIdProofUrl)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs text-medical-400 hover:text-medical-300 font-semibold underline"
@@ -477,7 +477,7 @@ export default function StudentLeaveDetailsPage({ params }: PageProps) {
                   <span className="text-[10px] text-slate-500 font-mono">{doc.fileType}</span>
                 </div>
                 <a
-                  href={doc.fileUrl.startsWith('/') ? `http://localhost:5000${doc.fileUrl}` : doc.fileUrl}
+                  href={getAssetUrl(doc.fileUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-2.5 rounded-lg border border-white/5 hover:border-medical-500/40 hover:bg-medical-500/10 text-medical-400 font-semibold flex items-center justify-center gap-2 transition"

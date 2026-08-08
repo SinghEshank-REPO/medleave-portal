@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { Response } from 'express';
 import { prisma } from '../config/db';
 import { AuthenticatedRequest } from '../middleware/auth.middleware';
@@ -54,6 +55,20 @@ export class LeaveController {
 
       if (!student) {
         return res.status(404).json({ message: 'Student profile not found.' });
+      }
+
+      // 0. Pre-read file buffer before Multer cleanup
+      let fileBufferPayload: { base64Data: string; mimeType: string } | undefined = undefined;
+      try {
+        if (fs.existsSync(certificateFile.path)) {
+          const buffer = fs.readFileSync(certificateFile.path);
+          fileBufferPayload = {
+            base64Data: buffer.toString('base64'),
+            mimeType: certificateFile.mimetype || 'image/jpeg'
+          };
+        }
+      } catch (err) {
+        console.warn('[LeaveController] Could not pre-read certificate file buffer:', err);
       }
 
       // 1. Upload medical certificate to file storage
@@ -127,7 +142,7 @@ export class LeaveController {
       // 5. Trigger real Gemini AI visual analysis synchronously
       console.log(`[LeaveController] Running Gemini AI visual scan for document: ${storageResult.url}...`);
       try {
-        const aiResult = await AIService.analyzeCertificate(storageResult.url, student.user.name);
+        const aiResult = await AIService.analyzeCertificate(storageResult.url, student.user.name, fileBufferPayload);
         
         await prisma.aIAnalysis.create({
           data: {

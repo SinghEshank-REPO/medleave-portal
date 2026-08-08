@@ -1,4 +1,14 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+export const BACKEND_URL = API_URL.replace(/\/api\/?$/, '');
+
+export function getAssetUrl(fileUrl: string | null | undefined): string {
+  if (!fileUrl) return '#';
+  if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
+    return fileUrl;
+  }
+  const cleanPath = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
+  return `${BACKEND_URL}${cleanPath}`;
+}
 
 // Helper to get auth headers
 const getHeaders = (isMultipart = false) => {
