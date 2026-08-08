@@ -62,14 +62,13 @@ export class AIService {
       console.warn('[AIService] Failed to load image buffer for Gemini vision:', e);
     }
 
-    // 2. Call Gemini API models (Gemini 3.0+ & Flash versions prioritized)
+    // 2. Call Gemini API models (Verified active 3.0+ & Flash versions)
     const geminiModels = [
-      'gemini-3.0-flash',
       'gemini-2.5-flash',
+      'gemini-3.5-flash',
+      'gemini-3.6-flash',
       'gemini-2.0-flash',
-      'gemini-2.0-flash-exp',
-      'gemini-3.0-pro',
-      'gemini-2.5-pro'
+      'gemini-flash-latest'
     ];
     const promptText = `You are an AI medical document verification agent for a university medical condonation portal.
 Analyze the provided medical certificate document image for authenticity.
