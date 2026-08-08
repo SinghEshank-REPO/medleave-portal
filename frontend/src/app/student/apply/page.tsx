@@ -10,6 +10,8 @@ import { ArrowLeft, Upload, Loader2, FileText, CheckCircle } from 'lucide-react'
 export default function ApplyLeavePage() {
   const router = useRouter();
   
+  const todayDateStr = new Date().toISOString().split('T')[0];
+  
   // State variables
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -190,13 +192,19 @@ export default function ApplyLeavePage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Leave Start Date</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex justify-between items-center">
+                    <span>Leave Start Date</span>
+                    <span className="text-[10px] text-slate-500 lowercase font-normal">(up to today)</span>
+                  </label>
                   <input
                     type="date"
                     required
+                    max={endDate || todayDateStr}
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-medical-500/60 transition"
+                    onClick={(e) => (e.target as any).showPicker?.()}
+                    onFocus={(e) => (e.target as any).showPicker?.()}
+                    className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-medical-500/60 transition cursor-pointer [color-scheme:dark]"
                   />
                 </div>
               </div>
@@ -204,13 +212,20 @@ export default function ApplyLeavePage() {
               {/* End Date & Partial Day Setup */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Leave End Date</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex justify-between items-center">
+                    <span>Leave End Date</span>
+                    <span className="text-[10px] text-slate-500 lowercase font-normal">(up to today)</span>
+                  </label>
                   <input
                     type="date"
                     required
+                    min={startDate}
+                    max={todayDateStr}
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-medical-500/60 transition"
+                    onClick={(e) => (e.target as any).showPicker?.()}
+                    onFocus={(e) => (e.target as any).showPicker?.()}
+                    className="w-full px-4 py-3 bg-slate-900 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-medical-500/60 transition cursor-pointer [color-scheme:dark]"
                   />
                 </div>
 

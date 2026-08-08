@@ -124,44 +124,44 @@ export class LeaveController {
         });
       }
 
-      // 5. Trigger AI Analysis asynchronously
-      AIService.analyzeCertificate(storageResult.url, student.user.name)
-        .then(async (aiResult) => {
-          await prisma.aIAnalysis.create({
-            data: {
-              medicalDocumentId: document.id,
-              patientName: aiResult.patientName,
-              doctorName: aiResult.doctorName,
-              hospitalName: aiResult.hospitalName,
-              diagnosis: aiResult.diagnosis,
-              restDays: aiResult.restDays,
-              confidenceScore: aiResult.confidenceScore,
-              autoSummary: aiResult.autoSummary,
-              status: aiResult.status,
-              fraudAlerts: JSON.stringify(aiResult.fraudAlerts)
-            }
-          });
-
-          // Log AI Analysis result
-          console.log(`[LeaveController] AI analysis completed for leave ${application.id}. Status: ${aiResult.status}`);
-          
-          // If suspicious, create a system notification for the doctor
-          if (aiResult.status === 'SUSPICIOUS') {
-            const doctors = await prisma.user.findMany({ where: { role: 'MED_OFFICER' } });
-            for (const doc of doctors) {
-              await prisma.notification.create({
-                data: {
-                  userId: doc.id,
-                  message: `ALERT: AI flagged uploaded certificate for ${student.user.name} (${student.rollNumber}) as suspicious (Confidence: ${aiResult.confidenceScore}).`,
-                  type: 'ESCALATION'
-                }
-              });
-            }
+      // 5. Trigger real Gemini AI visual analysis synchronously
+      console.log(`[LeaveController] Running Gemini AI visual scan for document: ${storageResult.url}...`);
+      try {
+        const aiResult = await AIService.analyzeCertificate(storageResult.url, student.user.name);
+        
+        await prisma.aIAnalysis.create({
+          data: {
+            medicalDocumentId: document.id,
+            patientName: aiResult.patientName,
+            doctorName: aiResult.doctorName,
+            hospitalName: aiResult.hospitalName,
+            diagnosis: aiResult.diagnosis,
+            restDays: aiResult.restDays,
+            confidenceScore: aiResult.confidenceScore,
+            autoSummary: aiResult.autoSummary,
+            status: aiResult.status,
+            fraudAlerts: JSON.stringify(aiResult.fraudAlerts)
           }
-        })
-        .catch((err) => {
-          console.error('[LeaveController] Background AI Analysis failed:', err);
         });
+
+        console.log(`[LeaveController] Gemini AI analysis completed for leave ${application.id}. Score: ${Math.round(aiResult.confidenceScore * 100)}/100, Status: ${aiResult.status}`);
+        
+        // If suspicious, create a system notification for the doctor
+        if (aiResult.status === 'SUSPICIOUS') {
+          const doctors = await prisma.user.findMany({ where: { role: 'MED_OFFICER' } });
+          for (const doc of doctors) {
+            await prisma.notification.create({
+              data: {
+                userId: doc.id,
+                message: `ALERT: AI flagged uploaded certificate for ${student.user.name} (${student.rollNumber}) as suspicious (Authenticity Score: ${Math.round(aiResult.confidenceScore * 100)}/100).`,
+                type: 'ESCALATION'
+              }
+            });
+          }
+        }
+      } catch (aiErr) {
+        console.error('[LeaveController] Synchronous AI Analysis error:', aiErr);
+      }
 
       // 6. Notify Medical Officer
       const doctors = await prisma.user.findMany({ where: { role: 'MED_OFFICER' } });
