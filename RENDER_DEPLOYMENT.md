@@ -78,7 +78,7 @@ Click **Advanced** or navigate to **Environment** in the sidebar, and add the fo
 
 | Key | Value | Description |
 | :--- | :--- | :--- |
-| `DATABASE_URL` | *[Paste your Internal Database URL here]* | The connection string copied from Step 2. |
+| `DATABASE_URL` | `postgresql://medleave_gtv1_user:QUtqhkbJMMdlp1guSX6aQIg1q9pFG4jj@dpg-dape64psrm7s73f5s8m0-a/medleave_gtv1` | **Internal Database URL** (used for services hosted on Render for private, fast connection). |
 | `PORT` | `10000` | Render's default port. |
 | `NODE_ENV` | `production` | Enables production mode. |
 | `JWT_SECRET` | *[Create a random secret string]* | Secret key for signing authorization tokens. |
