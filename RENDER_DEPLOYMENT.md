@@ -69,9 +69,9 @@ Deploy the Express backend as a **Web Service** on Render.
      ```
    - **Start Command**: 
      ```bash
-     npx prisma db push && npm start
+     npx prisma db push && npx prisma db seed && npm start
      ```
-     *(Note: `npx prisma db push` is used since we removed the SQLite migrations. It will automatically create the PostgreSQL tables based on the updated schema file.)*
+     *(Note: Adding `npx prisma db seed` here automatically creates and seeds your database tables for free every time Render deploys).*
 
 ### Environment Variables
 Click **Advanced** or navigate to **Environment** in the sidebar, and add the following keys:
@@ -91,14 +91,22 @@ Click **Advanced** or navigate to **Environment** in the sidebar, and add the fo
 5. Click **Create Web Service**.
 6. Once deployed, note down the backend's public URL (e.g., `https://medleave-backend.onrender.com`).
 
-### Seeding the Database
-To populate the database with initial timetable data and test accounts (e.g., `student@juit.ac.in`, `doctor@juit.ac.in`), run the seed script from Render:
-1. Go to your `medleave-backend` service page on Render.
-2. Click **Shell** in the left sidebar.
-3. Run the following command:
-   ```bash
-   npx prisma db seed
-   ```
+### Seeding the Database (2 Free Methods)
+Since Render's interactive Shell requires a paid plan, choose one of these **100% free** options to populate your database with test accounts (e.g. `student@juit.ac.in`, `doctor@juit.ac.in` with password `password123`):
+
+#### Method 1: Automatic seeding on Render Start Command (Easiest)
+In your Render Backend Web Service settings, set the **Start Command** to:
+```bash
+npx prisma db push && npx prisma db seed && npm start
+```
+Every time Render builds and starts your web service, it automatically seeds the database.
+
+#### Method 2: Seed directly from your local terminal
+Because your local `.env` file uses the **External Database URL**, you can seed the live Render database directly from your local computer for free:
+```bash
+cd backend
+npx prisma db seed
+```
 
 ---
 
