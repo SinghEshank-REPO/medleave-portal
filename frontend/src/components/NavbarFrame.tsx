@@ -72,12 +72,30 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
     setDarkMode(!darkMode);
   };
 
-  const markRead = async (id: string) => {
+  const markRead = async (id: string, message: string) => {
     try {
       await api.markNotificationRead(id);
       setNotifications(prev => 
         prev.map(n => n.id === id ? { ...n, isRead: true } : n)
       );
+
+      // Extract leave application ID if present in notification message
+      const match = message.match(/\[AppID:([a-f0-9\-]+)\]/i);
+      const leaveId = match ? match[1] : null;
+
+      if (user.role === 'HOD') {
+        if (leaveId) {
+          router.push(`/hod/leave/${leaveId}`);
+        } else {
+          router.push('/hod/dashboard');
+        }
+      } else if (user.role === 'FACULTY') {
+        router.push('/faculty/dashboard');
+      } else if (user.role === 'STUDENT' && leaveId) {
+        router.push(`/student/leave/${leaveId}`);
+      } else if (leaveId) {
+        router.push(`/approver/leave/${leaveId}`);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -108,8 +126,11 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
       );
     } else if (role === 'FACULTY') {
       links.push(
-        { name: 'Approvals Queue', href: '/approver/dashboard', icon: ClipboardCheck },
         { name: 'Condonations', href: '/faculty/dashboard', icon: CheckSquare }
+      );
+    } else if (role === 'HOD') {
+      links.push(
+        { name: 'Students Approved', href: '/hod/dashboard', icon: Users }
       );
     } else if (role === 'ADMIN') {
       links.push(
@@ -118,7 +139,7 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
         { name: 'Audit Logs', href: '/admin/audit', icon: ScrollText }
       );
     } else {
-      // HOD, WARDEN, MED_OFFICER
+      // WARDEN, MED_OFFICER
       links.push(
         { name: 'Approvals Queue', href: '/approver/dashboard', icon: ClipboardCheck }
       );
@@ -189,7 +210,7 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
                     notifications.map((n) => (
                       <div
                         key={n.id}
-                        onClick={() => markRead(n.id)}
+                        onClick={() => markRead(n.id, n.message)}
                         className={`p-3 hover:bg-slate-800/30 transition cursor-pointer flex flex-col gap-1 ${!n.isRead ? 'bg-medical-500/5' : ''}`}
                       >
                         <p className="text-slate-200 leading-normal">{n.message}</p>

@@ -199,7 +199,7 @@ export class LeaveController {
         await prisma.notification.create({
           data: {
             userId: hod.user.id,
-            message: `Notification: Student ${student.user.name} (${student.rollNumber}) has submitted a medical leave request (${parsedStartDate.toLocaleDateString()} to ${parsedEndDate.toLocaleDateString()}).`,
+            message: `Notification: Student ${student.user.name} (${student.rollNumber}) submitted medical leave from ${parsedStartDate.toLocaleDateString()} to ${parsedEndDate.toLocaleDateString()}. [AppID:${application.id}]`,
             type: 'DECISION'
           }
         });
@@ -502,7 +502,7 @@ export class LeaveController {
             await prisma.notification.create({
               data: {
                 userId: hod.user.id,
-                message: `Notification: Medical leave for student ${leave.student.user.name} (${leave.student.rollNumber}) has been FULLY APPROVED.`,
+                message: `Medical Leave Approved: Student ${leave.student.user.name} (${leave.student.rollNumber}) leave from ${leave.startDate.toLocaleDateString()} to ${leave.endDate.toLocaleDateString()} has been approved. [AppID:${leave.id}]`,
                 type: 'DECISION'
               }
             });
