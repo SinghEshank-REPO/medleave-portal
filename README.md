@@ -74,7 +74,7 @@ medleave-portal/
 4. **Attendance Condonation Pipeline**:
    - On final leave approval, the system queries the student's section timetable (e.g. LECTURE vs LAB schedules) and generates targeted class absences (`MissedClass`).
    - Respective teaching faculty members receive alerts and can condone absences with a single click.
-   - Student dashboards display **Raw Attendance** vs. **Condoned Attendance** percentages. If a student falls below 75% raw but condones enough classes, the portal highlights them as "Condoned to Safe."
+   - Student dashboards display **Raw Attendance** vs. **Condoned Attendance** percentages. If a student falls below 80% raw but condones enough classes, the portal highlights them as "Condoned to Safe."
 5. **Repeat Leave Counseling Flags**: Students submitting more than 2 medical leave claims per semester are flagged in the Admin panel for counseling follow-ups.
 
 ---

@@ -19,7 +19,7 @@ export default function Home() {
   const faqs = [
     {
       question: "What is the minimum attendance requirement at JUIT Waknaghat?",
-      answer: "According to the academic ordinances of JUIT Waknaghat, students are required to maintain a minimum of 75% attendance in each course (Lectures, Tutorials, and Practical Labs) to be eligible to sit for the end-semester examinations."
+      answer: "According to the academic ordinances of JUIT Waknaghat, students are required to maintain a minimum of 80% attendance in each course (Lectures, Tutorials, and Practical Labs) to be eligible to sit for the end-semester examinations."
     },
     {
       question: "How does the PS-08 Condonation policy work?",

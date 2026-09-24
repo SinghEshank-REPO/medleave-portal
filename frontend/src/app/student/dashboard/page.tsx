@@ -116,8 +116,8 @@ export default function StudentDashboard() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {attendance.map((c) => {
-                const meetsCriteria = c.condonedAttendance >= 75;
-                const wasDeficient = c.rawAttendance < 75;
+                const meetsCriteria = c.condonedAttendance >= 80;
+                const wasDeficient = c.rawAttendance < 80;
                 return (
                   <div key={c.courseCode} className="p-4 rounded-xl border border-white/5 bg-slate-900/40 space-y-4">
                     <div className="flex justify-between items-start">
@@ -156,7 +156,7 @@ export default function StudentDashboard() {
                     <div className="flex justify-between items-center pt-2 border-t border-slate-800/60 text-[10px]">
                       <span className="text-slate-500">Classes: {c.present}/{c.totalClasses}</span>
                       {wasDeficient && meetsCriteria ? (
-                        <span className="text-emerald-400 font-bold bg-emerald-500/5 px-2 py-0.5 rounded">Condoned to Safe (&gt;=75%)</span>
+                        <span className="text-emerald-400 font-bold bg-emerald-500/5 px-2 py-0.5 rounded">Condoned to Safe (&gt;=80%)</span>
                       ) : meetsCriteria ? (
                         <span className="text-slate-400 font-medium bg-slate-800/40 px-2 py-0.5 rounded">Safe Attendance</span>
                       ) : (
