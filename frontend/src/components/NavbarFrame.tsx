@@ -74,6 +74,7 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
 
   const markRead = async (id: string, message: string) => {
     try {
+      setShowNotifications(false);
       await api.markNotificationRead(id);
       setNotifications(prev => 
         prev.map(n => n.id === id ? { ...n, isRead: true } : n)
@@ -91,10 +92,18 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
         }
       } else if (user.role === 'FACULTY') {
         router.push('/faculty/dashboard');
-      } else if (user.role === 'STUDENT' && leaveId) {
-        router.push(`/student/leave/${leaveId}`);
-      } else if (leaveId) {
-        router.push(`/approver/leave/${leaveId}`);
+      } else if (user.role === 'STUDENT') {
+        if (leaveId) {
+          router.push(`/student/leave/${leaveId}`);
+        } else {
+          router.push('/student/dashboard');
+        }
+      } else {
+        if (leaveId) {
+          router.push(`/approver/leave/${leaveId}`);
+        } else {
+          router.push('/approver/dashboard');
+        }
       }
     } catch (err) {
       console.error(err);

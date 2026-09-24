@@ -232,6 +232,16 @@ export class LeaveController {
     try {
       if (!req.user) return res.status(401).json({ message: 'Unauthorized.' });
 
+      // Auto-migrate any PENDING_FACULTY leaves (where Doctor and Warden signed off) to APPROVED
+      try {
+        await prisma.leaveApplication.updateMany({
+          where: { status: 'PENDING_FACULTY', healthCentreApproved: true },
+          data: { status: 'APPROVED', facultyApproved: true }
+        });
+      } catch (migrateErr) {
+        console.warn('Auto-migrate PENDING_FACULTY warning:', migrateErr);
+      }
+
       const role = req.user.role;
       let leaves = [];
 
@@ -382,18 +392,17 @@ export class LeaveController {
       // Verification checks depending on current level
       if (leave.status === 'PENDING_HEALTH_CENTRE' && currentRole === 'MED_OFFICER') {
         if (action === 'APPROVE') {
-          // Progress to Warden if residential, else Faculty
+          // Progress to Warden if residential, else APPROVED directly
           nextApproverRole = leave.student.isResidential ? 'WARDEN' : 'FACULTY';
-          updatedStatus = leave.student.isResidential ? 'PENDING_WARDEN' : 'PENDING_FACULTY';
+          updatedStatus = leave.student.isResidential ? 'PENDING_WARDEN' : 'APPROVED';
           
           await prisma.leaveApplication.update({
             where: { id },
             data: {
               healthCentreApproved: true,
-              healthCentreDeadline: null, // cleared
-              // Set next deadline (24 hours for warden or 48 for faculty)
-              wardenDeadline: leave.student.isResidential ? new Date(now.getTime() + 24 * 60 * 60 * 1000) : null,
-              facultyDeadline: !leave.student.isResidential ? new Date(now.getTime() + 48 * 60 * 60 * 1000) : null
+              healthCentreDeadline: null,
+              facultyApproved: !leave.student.isResidential,
+              wardenDeadline: leave.student.isResidential ? new Date(now.getTime() + 24 * 60 * 60 * 1000) : null
             }
           });
         } else if (action === 'REJECT') {
@@ -404,14 +413,14 @@ export class LeaveController {
       } else if (leave.status === 'PENDING_WARDEN' && currentRole === 'WARDEN') {
         if (action === 'APPROVE') {
           nextApproverRole = 'FACULTY';
-          updatedStatus = 'PENDING_FACULTY';
+          updatedStatus = 'APPROVED';
           
           await prisma.leaveApplication.update({
             where: { id },
             data: {
               wardenApproved: true,
-              wardenDeadline: null,
-              facultyDeadline: new Date(now.getTime() + 48 * 60 * 60 * 1000)
+              facultyApproved: true,
+              wardenDeadline: null
             }
           });
         } else if (action === 'REJECT') {
@@ -419,9 +428,8 @@ export class LeaveController {
         } else {
           updatedStatus = 'CLARIFICATION_REQUESTED';
         }
-      } else if (leave.status === 'PENDING_FACULTY' && currentRole === 'FACULTY') {
+      } else if (leave.status === 'PENDING_FACULTY') {
         if (action === 'APPROVE') {
-          // Fully approved!
           nextApproverRole = 'FACULTY';
           updatedStatus = 'APPROVED';
           
@@ -432,6 +440,7 @@ export class LeaveController {
               facultyDeadline: null
             }
           });
+        }
 
           // Auto-condone all missed classes for this leave application with one click!
           const facultyProfile = await prisma.faculty.findUnique({

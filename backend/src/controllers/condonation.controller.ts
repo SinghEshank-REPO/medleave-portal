@@ -28,7 +28,7 @@ export class CondonationController {
             departmentId: faculty.departmentId
           },
           leaveApplication: {
-            status: 'APPROVED' // Leave must be fully approved
+            status: { in: ['APPROVED', 'PENDING_FACULTY'] }
           }
         },
         include: {
