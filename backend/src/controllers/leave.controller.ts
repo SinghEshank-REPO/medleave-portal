@@ -516,7 +516,7 @@ export class LeaveController {
           }
         }
         await LeaveController.triggerCondonationNotifications(id);
-      } else if (updatedStatus === 'PENDING_WARDEN' || updatedStatus === 'PENDING_FACULTY') {
+      } else if (updatedStatus === 'PENDING_WARDEN') {
         // Notify the next reviewer role
         const approverUsers = await prisma.user.findMany({ where: { role: nextApproverRole } });
         for (const appUser of approverUsers) {

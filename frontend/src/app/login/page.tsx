@@ -29,10 +29,12 @@ export default function LoginPage() {
         router.push('/student/dashboard');
       } else if (role === 'FACULTY') {
         router.push('/faculty/dashboard');
+      } else if (role === 'HOD') {
+        router.push('/hod/dashboard');
       } else if (role === 'ADMIN') {
         router.push('/admin/dashboard');
       } else {
-        // FACULTY, HOD, WARDEN, MED_OFFICER all use the unified Approver Dashboard
+        // WARDEN, MED_OFFICER use the unified Approver Dashboard
         router.push('/approver/dashboard');
       }
     } catch (err: any) {
