@@ -175,11 +175,11 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
           </button>
           
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-medical-500 to-indigo-500 flex items-center justify-center glow-medical">
-              <Activity className="w-4.5 h-4.5 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+              <Activity className="w-4.5 h-4.5 text-emerald-400" />
             </div>
-            <span className="font-bold text-base bg-gradient-to-r from-white via-slate-300 to-medical-400 bg-clip-text text-transparent hidden sm:inline-block">
-              MedLeave Portal
+            <span className="font-extrabold text-base text-white tracking-tight hidden sm:inline-block">
+              MedLeave <span className="text-emerald-400">Portal</span>
             </span>
           </div>
         </div>
@@ -220,7 +220,7 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
                       <div
                         key={n.id}
                         onClick={() => markRead(n.id, n.message)}
-                        className={`p-3 hover:bg-slate-800/30 transition cursor-pointer flex flex-col gap-1 ${!n.isRead ? 'bg-medical-500/5' : ''}`}
+                        className={`p-3 hover:bg-slate-800/30 transition cursor-pointer flex flex-col gap-1 ${!n.isRead ? 'bg-emerald-500/10' : ''}`}
                       >
                         <p className="text-slate-200 leading-normal">{n.message}</p>
                         <span className="text-[10px] text-slate-500">{new Date(n.createdAt).toLocaleTimeString()}</span>
@@ -234,7 +234,7 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
 
           {/* User profile capsule */}
           <div className="flex items-center gap-3 pl-3 border-l border-white/10">
-            <div className="w-8 h-8 rounded-full bg-medical-500/20 text-medical-400 flex items-center justify-center font-bold text-xs border border-medical-500/30">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-xs border border-emerald-500/30">
               {user.name.charAt(0)}
             </div>
             <div className="hidden md:flex flex-col text-left">
@@ -259,8 +259,8 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
           <div className="flex flex-col justify-between h-full p-4">
             <div className="space-y-6">
               {/* Profile card summary */}
-              <div className="p-4 rounded-xl bg-slate-900/40 border border-white/5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-medical-500/10 flex items-center justify-center text-medical-400">
+              <div className="p-4 rounded-xl bg-zinc-900/60 border border-white/5 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                   <UserIcon className="w-5 h-5" />
                 </div>
                 <div className="text-left overflow-hidden">
@@ -279,7 +279,7 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
                       key={link.name}
                       href={link.href}
                       onClick={() => setSidebarOpen(false)}
-                      className={`flex items-center justify-between px-4 py-3 rounded-xl transition text-xs font-semibold ${isActive ? 'bg-gradient-to-r from-medical-600/20 to-indigo-600/10 border-l-4 border-medical-500 text-medical-400' : 'text-slate-400 hover:bg-slate-800/30 hover:text-white'}`}
+                      className={`flex items-center justify-between px-4 py-3 rounded-xl transition text-xs font-semibold ${isActive ? 'bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-400' : 'text-slate-400 hover:bg-zinc-800/40 hover:text-white'}`}
                     >
                       <div className="flex items-center gap-3">
                         <LinkIcon className="w-4.5 h-4.5" />

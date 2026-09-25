@@ -53,10 +53,10 @@ export default function LoginPage() {
         {/* Branding header */}
         <div className="flex flex-col items-center mb-8 text-center">
           <Link href="/" className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-medical-500 to-indigo-500 flex items-center justify-center glow-medical">
-              <Activity className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shadow-lg shadow-emerald-950/20">
+              <Activity className="w-5 h-5 text-emerald-400" />
             </div>
-            <span className="font-bold text-xl text-white">MedLeave Portal</span>
+            <span className="font-extrabold text-xl text-white tracking-tight">MedLeave <span className="text-emerald-400">Portal</span></span>
           </Link>
           <p className="text-slate-400 text-sm">Enter your credentials to access your dashboard</p>
         </div>
@@ -82,7 +82,7 @@ export default function LoginPage() {
                   placeholder="name@juit.ac.in"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-900/60 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-medical-500/60 focus:ring-1 focus:ring-medical-500/30 transition placeholder-slate-600"
+                  className="w-full pl-12 pr-4 py-3.5 bg-slate-900/60 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 transition placeholder-slate-600"
                 />
               </div>
             </div>
@@ -90,7 +90,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Password</label>
-                <a href="#" className="text-xs font-medium text-medical-400 hover:text-medical-300">Forgot?</a>
+                <a href="#" className="text-xs font-medium text-emerald-400 hover:text-emerald-300">Forgot?</a>
               </div>
               <div className="relative">
                 <Lock className="absolute left-4 top-3.5 h-5 w-5 text-slate-500" />
@@ -100,7 +100,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-900/60 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-medical-500/60 focus:ring-1 focus:ring-medical-500/30 transition placeholder-slate-600"
+                  className="w-full pl-12 pr-4 py-3.5 bg-slate-900/60 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 transition placeholder-slate-600"
                 />
               </div>
             </div>
@@ -108,7 +108,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-medical-600 to-indigo-600 hover:from-medical-500 hover:to-indigo-500 text-white font-medium text-sm flex items-center justify-center gap-2 transition active:scale-[0.99] disabled:opacity-55 disabled:pointer-events-none glow-medical mt-6"
+              className="w-full py-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 transition active:scale-[0.99] disabled:opacity-55 disabled:pointer-events-none shadow-lg shadow-emerald-950/20 mt-6"
             >
               {loading ? (
                 <>
@@ -125,7 +125,7 @@ export default function LoginPage() {
           {/* Quick Mock Login helpers */}
           <div className="mt-6 pt-5 border-t border-slate-800 text-center">
             <span className="text-xs text-slate-500">Don't have an account? </span>
-            <Link href="/register" className="text-xs font-bold text-medical-400 hover:text-medical-300">
+            <Link href="/register" className="text-xs font-bold text-emerald-400 hover:text-emerald-300">
               Sign Up
             </Link>
           </div>

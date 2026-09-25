@@ -111,10 +111,10 @@ export default function RegisterPage() {
       <div className="w-full max-w-lg relative z-10">
         <div className="flex flex-col items-center mb-6 text-center">
           <Link href="/" className="flex items-center gap-3 mb-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-medical-500 to-indigo-500 flex items-center justify-center glow-medical">
-              <Activity className="w-4 h-4 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shadow-lg shadow-emerald-950/20">
+              <Activity className="w-4 h-4 text-emerald-400" />
             </div>
-            <span className="font-bold text-lg text-white font-sans">MedLeave Portal</span>
+            <span className="font-extrabold text-lg text-white font-sans tracking-tight">MedLeave <span className="text-emerald-400">Portal</span></span>
           </Link>
           <p className="text-slate-400 text-xs">Create your university medical condonation account</p>
         </div>
@@ -140,7 +140,7 @@ export default function RegisterPage() {
                   placeholder="E.g. Aditya Sen"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-medical-500/60 focus:ring-1 focus:ring-medical-500/30 transition placeholder-slate-600"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 transition placeholder-slate-600"
                 />
               </div>
             </div>
@@ -157,7 +157,7 @@ export default function RegisterPage() {
                     placeholder="student@juit.ac.in"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-medical-500/60 focus:ring-1 focus:ring-medical-500/30 transition placeholder-slate-600"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 transition placeholder-slate-600"
                   />
                 </div>
               </div>
@@ -172,7 +172,7 @@ export default function RegisterPage() {
                     placeholder="Min 6 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-medical-500/60 focus:ring-1 focus:ring-medical-500/30 transition placeholder-slate-600"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 transition placeholder-slate-600"
                   />
                 </div>
               </div>
@@ -184,7 +184,7 @@ export default function RegisterPage() {
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-900/60 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-medical-500/60 transition"
+                className="w-full px-4 py-3 bg-slate-900/60 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500/60 transition"
               >
                 <option value="STUDENT">Student</option>
                 <option value="FACULTY">Teaching Faculty</option>
@@ -332,7 +332,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-medical-600 to-indigo-600 hover:from-medical-500 hover:to-indigo-500 text-white font-medium flex items-center justify-center gap-2 transition active:scale-[0.99] disabled:opacity-55 disabled:pointer-events-none glow-medical mt-4"
+              className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold flex items-center justify-center gap-2 transition active:scale-[0.99] disabled:opacity-55 shadow-lg shadow-emerald-950/20 mt-4"
             >
               {loading ? (
                 <>
@@ -348,7 +348,7 @@ export default function RegisterPage() {
 
           <div className="mt-5 pt-4 border-t border-slate-800 text-center">
             <span className="text-xs text-slate-500">Already registered? </span>
-            <Link href="/login" className="text-xs font-bold text-medical-400 hover:text-medical-300">
+            <Link href="/login" className="text-xs font-bold text-emerald-400 hover:text-emerald-300">
               Log In
             </Link>
           </div>

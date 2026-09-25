@@ -57,7 +57,7 @@ export default function StudentDashboard() {
           </div>
           <Link
             href="/student/apply"
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-medical-600 to-indigo-600 hover:from-medical-500 hover:to-indigo-500 text-white text-xs font-semibold hover:scale-[1.01] transition active:scale-[0.99] glow-medical"
+            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs hover:scale-[1.01] transition active:scale-[0.99] shadow-lg shadow-emerald-950/20"
           >
             <Plus className="w-4 h-4" /> Apply For Medical Leave
           </Link>

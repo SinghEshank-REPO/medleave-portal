@@ -412,7 +412,7 @@ export default function ApplyLeavePage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-medical-600 to-indigo-600 hover:from-medical-500 hover:to-indigo-500 text-white font-medium flex items-center justify-center gap-2 transition active:scale-[0.99] disabled:opacity-55 glow-medical"
+                  className="flex-1 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm flex items-center justify-center gap-2 transition active:scale-[0.99] disabled:opacity-55 shadow-lg shadow-emerald-950/20"
                 >
                   {loading ? (
                     <>
