@@ -16,17 +16,17 @@ const config: Config = {
           200: '#a7f3d0',
           300: '#6ee7b7',
           400: '#34d399',
-          500: '#10b981', // primary doctor emerald green
+          500: '#10b981', // clean emerald accent green
           600: '#059669',
           700: '#047857',
           800: '#065f46',
           900: '#064e3b',
-          950: '#051410', // deep dark forest medical green base
+          950: '#050908', // near-black charcoal base
         },
         darkbg: {
-          DEFAULT: '#051410', // dark forest medical green theme base
-          card: '#0c221b',
-          border: '#14382e'
+          DEFAULT: '#050908', // pure charcoal/near-black theme base
+          card: '#0b1110',    // dark neutral card surface
+          border: '#182420'
         }
       },
       backgroundImage: {

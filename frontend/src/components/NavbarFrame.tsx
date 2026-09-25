@@ -112,10 +112,10 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-white">
+      <div className="min-h-screen flex items-center justify-center bg-[#050908] text-white">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-medical-500 to-indigo-500 flex items-center justify-center animate-pulse glow-medical">
-            <Activity className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center animate-pulse">
+            <Activity className="w-6 h-6 text-emerald-400" />
           </div>
           <span className="text-sm font-semibold text-slate-400">Loading Portal context...</span>
         </div>
@@ -160,12 +160,12 @@ export default function NavbarFrame({ children }: NavbarFrameProps) {
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark text-slate-100 bg-[#0f172a]' : 'bg-slate-50 text-slate-900'} transition-colors duration-300`}>
+    <div className={`min-h-screen ${darkMode ? 'dark text-slate-100 bg-[#050908]' : 'bg-slate-50 text-slate-900'} transition-colors duration-300`}>
       {/* Top Banner Grid background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none" />
 
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 glass-panel border-b border-white/5 flex items-center justify-between px-6 z-40 transition-colors">
+      <header className="fixed top-0 left-0 right-0 h-16 glass-panel border-b border-white/5 flex items-center justify-between px-6 z-40 transition-colors bg-[#080D0C]/80">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
