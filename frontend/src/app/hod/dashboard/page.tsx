@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+export const dynamic = 'force-dynamic';
+
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import NavbarFrame from '@/components/NavbarFrame';
 import { api, getAssetUrl } from '@/lib/api';
@@ -9,9 +11,9 @@ import {
   X, ShieldCheck, Search, Info, AlertCircle 
 } from 'lucide-react';
 
-export default function HodDashboard() {
+function HodDashboardContent() {
   const searchParams = useSearchParams();
-  const highlightLeaveId = searchParams.get('leaveId');
+  const highlightLeaveId = searchParams?.get('leaveId') || null;
 
   const [leaves, setLeaves] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -324,5 +326,17 @@ export default function HodDashboard() {
         </div>
       )}
     </NavbarFrame>
+  );
+}
+
+export default function HodDashboard() {
+  return (
+    <Suspense fallback={
+      <NavbarFrame>
+        <div className="py-12 text-center text-slate-500 text-xs">Loading department dashboard...</div>
+      </NavbarFrame>
+    }>
+      <HodDashboardContent />
+    </Suspense>
   );
 }

@@ -440,9 +440,7 @@ export class LeaveController {
               facultyDeadline: null
             }
           });
-        }
 
-          // Auto-condone all missed classes for this leave application with one click!
           const facultyProfile = await prisma.faculty.findUnique({
             where: { userId: req.user.id }
           });
